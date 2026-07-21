@@ -26,6 +26,8 @@ Entity IDs follow your Home Assistant language; test alerts and all-clear messag
 
 ## Bundled dashboard & cards
 
+![The auto-created Alerts dashboard](assets/screenshot_dashboard.png)
+
 The integration automatically creates an **"Alerts" dashboard** on first setup (and removes it again if you remove the integration — your own edits to it are never overwritten). It also registers three Lovelace cards, all with a **visual editor** and available in the normal card picker for use on any dashboard:
 
 | Card | Description |
