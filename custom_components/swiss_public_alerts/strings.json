@@ -1,0 +1,63 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Swiss Public Alerts",
+        "description": "Official public alerts from Alertswiss (Federal Office for Civil Protection). Whether your home is affected is determined from the alert area polygons and your Home Assistant home location.",
+        "data": {
+          "language": "Language",
+          "minimum_severity": "Minimum severity",
+          "update_interval": "Update interval"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not fetch the Alertswiss feed. Please try again later."
+    },
+    "abort": {
+      "already_configured": "Swiss Public Alerts is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Swiss Public Alerts options",
+        "data": {
+          "language": "Language",
+          "minimum_severity": "Minimum severity",
+          "update_interval": "Update interval"
+        }
+      }
+    }
+  },
+  "selector": {
+    "language": {
+      "options": {
+        "de": "German",
+        "en": "English",
+        "fr": "French",
+        "it": "Italian"
+      }
+    },
+    "minimum_severity": {
+      "options": {
+        "minor": "Information (minor)",
+        "moderate": "Warning (moderate)",
+        "severe": "Alarm (severe)"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "active_alerts": { "name": "Active alerts Switzerland" },
+      "home_alerts": { "name": "Alerts for home location" },
+      "heartbeat_age": { "name": "Feed heartbeat age" }
+    },
+    "binary_sensor": {
+      "home_affected": {
+        "name": "Home location affected",
+        "state": { "on": "Affected", "off": "Not affected" }
+      }
+    }
+  }
+}

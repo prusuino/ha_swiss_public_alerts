@@ -1,0 +1,63 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Swiss Public Alerts",
+        "description": "Offizielle Behördenmeldungen von Alertswiss (Bundesamt für Bevölkerungsschutz). Ob dein Zuhause betroffen ist, wird aus den Gebiets-Polygonen der Meldungen und deinem Home-Assistant-Standort ermittelt.",
+        "data": {
+          "language": "Sprache",
+          "minimum_severity": "Minimaler Schweregrad",
+          "update_interval": "Aktualisierungsintervall"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Der Alertswiss-Feed konnte nicht abgerufen werden. Bitte später erneut versuchen."
+    },
+    "abort": {
+      "already_configured": "Swiss Public Alerts ist bereits konfiguriert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Swiss Public Alerts Optionen",
+        "data": {
+          "language": "Sprache",
+          "minimum_severity": "Minimaler Schweregrad",
+          "update_interval": "Aktualisierungsintervall"
+        }
+      }
+    }
+  },
+  "selector": {
+    "language": {
+      "options": {
+        "de": "Deutsch",
+        "en": "Englisch",
+        "fr": "Französisch",
+        "it": "Italienisch"
+      }
+    },
+    "minimum_severity": {
+      "options": {
+        "minor": "Information (gering)",
+        "moderate": "Warnung (mittel)",
+        "severe": "Alarm (schwer)"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "active_alerts": { "name": "Aktive Meldungen Schweiz" },
+      "home_alerts": { "name": "Meldungen für Zuhause" },
+      "heartbeat_age": { "name": "Feed-Heartbeat-Alter" }
+    },
+    "binary_sensor": {
+      "home_affected": {
+        "name": "Zuhause betroffen",
+        "state": { "on": "Betroffen", "off": "Nicht betroffen" }
+      }
+    }
+  }
+}

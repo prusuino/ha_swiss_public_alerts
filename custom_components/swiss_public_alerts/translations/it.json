@@ -1,0 +1,63 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Swiss Public Alerts",
+        "description": "Allerte ufficiali di Alertswiss (Ufficio federale della protezione della popolazione). L'integrazione determina se la tua abitazione è interessata in base ai poligoni delle zone di allerta e alla posizione della tua casa in Home Assistant.",
+        "data": {
+          "language": "Lingua",
+          "minimum_severity": "Gravità minima",
+          "update_interval": "Intervallo di aggiornamento"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Impossibile recuperare il feed Alertswiss. Riprova più tardi."
+    },
+    "abort": {
+      "already_configured": "Swiss Public Alerts è già configurato."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opzioni Swiss Public Alerts",
+        "data": {
+          "language": "Lingua",
+          "minimum_severity": "Gravità minima",
+          "update_interval": "Intervallo di aggiornamento"
+        }
+      }
+    }
+  },
+  "selector": {
+    "language": {
+      "options": {
+        "de": "Tedesco",
+        "en": "Inglese",
+        "fr": "Francese",
+        "it": "Italiano"
+      }
+    },
+    "minimum_severity": {
+      "options": {
+        "minor": "Informazione (lieve)",
+        "moderate": "Avviso (moderata)",
+        "severe": "Allarme (grave)"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "active_alerts": { "name": "Allerte attive Svizzera" },
+      "home_alerts": { "name": "Allerte per la posizione di casa" },
+      "heartbeat_age": { "name": "Età heartbeat del feed" }
+    },
+    "binary_sensor": {
+      "home_affected": {
+        "name": "Casa interessata",
+        "state": { "on": "Interessata", "off": "Non interessata" }
+      }
+    }
+  }
+}

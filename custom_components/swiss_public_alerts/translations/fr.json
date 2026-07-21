@@ -1,0 +1,63 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Swiss Public Alerts",
+        "description": "Alertes officielles d'Alertswiss (Office fédéral de la protection de la population). L'intégration détermine si votre domicile est concerné à partir des polygones des zones d'alerte et de l'emplacement de votre domicile Home Assistant.",
+        "data": {
+          "language": "Langue",
+          "minimum_severity": "Gravité minimale",
+          "update_interval": "Intervalle de mise à jour"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Impossible de récupérer le flux Alertswiss. Veuillez réessayer plus tard."
+    },
+    "abort": {
+      "already_configured": "Swiss Public Alerts est déjà configuré."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options Swiss Public Alerts",
+        "data": {
+          "language": "Langue",
+          "minimum_severity": "Gravité minimale",
+          "update_interval": "Intervalle de mise à jour"
+        }
+      }
+    }
+  },
+  "selector": {
+    "language": {
+      "options": {
+        "de": "Allemand",
+        "en": "Anglais",
+        "fr": "Français",
+        "it": "Italien"
+      }
+    },
+    "minimum_severity": {
+      "options": {
+        "minor": "Information (mineure)",
+        "moderate": "Avertissement (modérée)",
+        "severe": "Alarme (grave)"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "active_alerts": { "name": "Alertes actives Suisse" },
+      "home_alerts": { "name": "Alertes pour le domicile" },
+      "heartbeat_age": { "name": "Âge du heartbeat du flux" }
+    },
+    "binary_sensor": {
+      "home_affected": {
+        "name": "Domicile concerné",
+        "state": { "on": "Concerné", "off": "Non concerné" }
+      }
+    }
+  }
+}
