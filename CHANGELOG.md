@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1
+
+- Declare `http` and `lovelace` as manifest dependencies (hassfest validation)
+
 ## 1.0.0
 
 Initial release.
