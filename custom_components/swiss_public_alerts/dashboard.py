@@ -223,8 +223,22 @@ def _hazards_markdown(ids: dict[str, str]) -> str:
     )
 
 
-def _hazards_section(ids: dict[str, str]) -> dict:
-    """Build the natural hazards dashboard section (native cards only)."""
+def _hazards_text_card(ids: dict[str, str]) -> dict:
+    """Markdown card with the official warning texts, stacked vertically."""
+    return {
+        "type": "markdown",
+        "content": _hazards_markdown(ids),
+        "grid_options": {"columns": 12},
+    }
+
+
+def _hazards_section(ids: dict[str, str], include_text: bool = False) -> dict:
+    """Build the natural hazards dashboard section (native cards only).
+
+    The warning-text card normally lives in the narrow "Zuhause" column so
+    the texts stack vertically; include_text adds it here instead for the
+    self-contained section appended to pre-existing dashboards.
+    """
     tiles = [
         {
             "type": "tile",
@@ -235,36 +249,29 @@ def _hazards_section(ids: dict[str, str]) -> dict:
         for suffix in _HAZARD_SUFFIXES[1:]
         if suffix in ids
     ]
-    return {
-        "type": "grid",
-        "column_span": 2,
-        "cards": [
-            {
-                "type": "heading",
-                "heading": "Naturgefahren",
-                "icon": "mdi:alert-octagram",
-                "badges": [
-                    {
-                        "type": "entity",
-                        "entity": ids["highest_hazard"],
-                        "show_state": True,
-                    }
-                ],
-            },
-            {
-                "type": "tile",
-                "entity": ids["highest_hazard"],
-                "color": "red",
-                "grid_options": {"columns": 12},
-            },
-            {
-                "type": "markdown",
-                "content": _hazards_markdown(ids),
-                "grid_options": {"columns": 12},
-            },
-            *tiles,
-        ],
-    }
+    cards = [
+        {
+            "type": "heading",
+            "heading": "Naturgefahren",
+            "icon": "mdi:alert-octagram",
+            "badges": [
+                {
+                    "type": "entity",
+                    "entity": ids["highest_hazard"],
+                    "show_state": True,
+                }
+            ],
+        },
+        {
+            "type": "tile",
+            "entity": ids["highest_hazard"],
+            "color": "red",
+            "grid_options": {"columns": 12},
+        },
+    ]
+    if include_text:
+        cards.append(_hazards_text_card(ids))
+    return {"type": "grid", "column_span": 2, "cards": [*cards, *tiles]}
 
 
 async def _async_append_hazards_section(
@@ -287,7 +294,7 @@ async def _async_append_hazards_section(
     if ids["highest_hazard"] in json.dumps(config):
         return  # already present (auto-added earlier or placed by the user)
     sections = config["views"][0].setdefault("sections", [])
-    sections.append(_hazards_section(ids))
+    sections.append(_hazards_section(ids, include_text=True))
     try:
         await storage.async_save(config)
     except HomeAssistantError as err:
@@ -303,8 +310,10 @@ def _build_config(hass: HomeAssistant, entry: ConfigEntry) -> dict:
     home_count = ids.get("home_alerts", "sensor.alertswiss_home_alerts")
     affected = ids.get("home_affected", "binary_sensor.alertswiss_home_affected")
 
+    home_extra = []
     sections_extra = []
     if "highest_hazard" in ids:
+        home_extra.append(_hazards_text_card(ids))
         sections_extra.append(_hazards_section(ids))
 
     return {
@@ -343,6 +352,7 @@ def _build_config(hass: HomeAssistant, entry: ConfigEntry) -> dict:
                             {"type": "tile", "entity": affected, "color": "red", "grid_options": {"columns": 6}},
                             {"type": "tile", "entity": home_count, "name": "Anzahl Meldungen", "color": "orange", "grid_options": {"columns": 6}},
                             {"type": "custom:alertswiss-alert-card", "entity": affected},
+                            *home_extra,
                         ],
                     },
                     {
