@@ -3,8 +3,10 @@
     "step": {
       "user": {
         "title": "Swiss Public Alerts",
-        "description": "Alertes officielles d'Alertswiss (Office fédéral de la protection de la population). L'intégration détermine si votre domicile est concerné à partir des polygones des zones d'alerte et de l'emplacement de votre domicile Home Assistant.",
+        "description": "Alertes officielles d'Alertswiss (Office fédéral de la protection de la population) et degrés de danger naturel du Portail des dangers naturels de la Confédération. L'intégration détermine si votre domicile est concerné à partir des polygones des zones d'alerte et de l'emplacement de votre domicile Home Assistant; les degrés de danger utilisent le code postal saisi ci-dessous.",
         "data": {
+          "data_sources": "Sources de données",
+          "plz": "Code postal (pour les degrés de danger naturel)",
           "language": "Langue",
           "minimum_severity": "Gravité minimale",
           "update_interval": "Intervalle de mise à jour"
@@ -12,7 +14,10 @@
       }
     },
     "error": {
-      "cannot_connect": "Impossible de récupérer le flux Alertswiss. Veuillez réessayer plus tard."
+      "cannot_connect": "Impossible de récupérer les données. Veuillez réessayer plus tard.",
+      "no_source": "Veuillez sélectionner au moins une source de données.",
+      "plz_required": "Un code postal suisse est requis pour les degrés de danger naturel.",
+      "plz_unknown": "Ce code postal est introuvable dans la liste des localités du Portail des dangers naturels."
     },
     "abort": {
       "already_configured": "Swiss Public Alerts est déjà configuré."
@@ -23,14 +28,28 @@
       "init": {
         "title": "Options Swiss Public Alerts",
         "data": {
+          "data_sources": "Sources de données",
+          "plz": "Code postal (pour les degrés de danger naturel)",
           "language": "Langue",
           "minimum_severity": "Gravité minimale",
           "update_interval": "Intervalle de mise à jour"
         }
       }
+    },
+    "error": {
+      "cannot_connect": "Impossible de récupérer les données. Veuillez réessayer plus tard.",
+      "no_source": "Veuillez sélectionner au moins une source de données.",
+      "plz_required": "Un code postal suisse est requis pour les degrés de danger naturel.",
+      "plz_unknown": "Ce code postal est introuvable dans la liste des localités du Portail des dangers naturels."
     }
   },
   "selector": {
+    "data_sources": {
+      "options": {
+        "alertswiss": "Alertes officielles Alertswiss",
+        "natural_hazards": "Degrés de danger naturel (dangers-naturels.ch)"
+      }
+    },
     "language": {
       "options": {
         "de": "Allemand",
@@ -51,7 +70,20 @@
     "sensor": {
       "active_alerts": { "name": "Alertes actives Suisse" },
       "home_alerts": { "name": "Alertes pour le domicile" },
-      "heartbeat_age": { "name": "Âge du heartbeat du flux" }
+      "heartbeat_age": { "name": "Âge du heartbeat du flux" },
+      "hazard_wind": { "name": "Degré de danger vent" },
+      "hazard_thunderstorm": { "name": "Degré de danger orages" },
+      "hazard_rain": { "name": "Degré de danger pluie" },
+      "hazard_snow": { "name": "Degré de danger neige" },
+      "hazard_slippery_roads": { "name": "Degré de danger routes glissantes" },
+      "hazard_heat_wave": { "name": "Degré de danger canicule" },
+      "hazard_frost": { "name": "Degré de danger gel" },
+      "hazard_forestfire": { "name": "Degré de danger incendie de forêt" },
+      "hazard_flood": { "name": "Degré de danger crues" },
+      "hazard_avalanches": { "name": "Degré de danger avalanches" },
+      "hazard_drought": { "name": "Degré de danger sécheresse" },
+      "hazard_earthquake": { "name": "Degré de danger séismes" },
+      "highest_hazard": { "name": "Degré de danger le plus élevé" }
     },
     "binary_sensor": {
       "home_affected": {

@@ -7,7 +7,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from . import AlertswissCoordinator
+from . import AlertswissCoordinator, RuntimeData
 from .const import DOMAIN, SEVERITY_RANK
 from .entity import AlertswissEntity
 
@@ -16,8 +16,10 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up the binary sensor."""
-    coordinator: AlertswissCoordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([HomeAffectedBinarySensor(coordinator)])
+    data: RuntimeData = hass.data[DOMAIN][entry.entry_id]
+    if data.alertswiss is None:
+        return
+    async_add_entities([HomeAffectedBinarySensor(data.alertswiss)])
 
 
 class HomeAffectedBinarySensor(AlertswissEntity, BinarySensorEntity):

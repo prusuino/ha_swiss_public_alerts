@@ -14,15 +14,27 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .api import Alert, AlertswissApiError, AlertswissClient, FeedData
 from .const import (
+    CONF_DATA_SOURCES,
     CONF_LANGUAGE,
     CONF_MINIMUM_SEVERITY,
+    CONF_PLZ,
     CONF_UPDATE_INTERVAL,
+    DEFAULT_DATA_SOURCES,
     DEFAULT_LANGUAGE,
     DEFAULT_MINIMUM_SEVERITY,
     DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
     SEVERITY_RANK,
+    SOURCE_ALERTSWISS,
+    SOURCE_HAZARDS,
     STATIC_URL_BASE,
+)
+from .hazards import (
+    HazardsApiError,
+    HazardsClient,
+    HazardsData,
+    find_location,
+    load_locations,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -111,6 +123,62 @@ class AlertswissCoordinator(DataUpdateCoordinator[FeedData]):
         return result
 
 
+class HazardsCoordinator(DataUpdateCoordinator[HazardsData]):
+    """Coordinator polling the naturgefahren.ch danger levels."""
+
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry, location) -> None:
+        self.entry = entry
+        self.client = HazardsClient(
+            async_get_clientsession(hass),
+            AlertswissCoordinator._option(entry, CONF_LANGUAGE, DEFAULT_LANGUAGE),
+            location,
+        )
+        super().__init__(
+            hass,
+            _LOGGER,
+            name=f"{DOMAIN}_hazards",
+            update_interval=timedelta(
+                seconds=AlertswissCoordinator._option(
+                    entry, CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
+                )
+            ),
+        )
+
+    def apply_options(self) -> None:
+        """Apply changed options without reloading the entry."""
+        self.client.language = AlertswissCoordinator._option(
+            self.entry, CONF_LANGUAGE, DEFAULT_LANGUAGE
+        )
+        self.update_interval = timedelta(
+            seconds=AlertswissCoordinator._option(
+                self.entry, CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
+            )
+        )
+
+    async def _async_update_data(self) -> HazardsData:
+        try:
+            return await self.client.async_fetch()
+        except HazardsApiError as err:
+            raise UpdateFailed(str(err)) from err
+
+
+class RuntimeData:
+    """Per-entry runtime data holding the active coordinators."""
+
+    def __init__(
+        self,
+        alertswiss: AlertswissCoordinator | None,
+        hazards: HazardsCoordinator | None,
+    ) -> None:
+        self.alertswiss = alertswiss
+        self.hazards = hazards
+
+
+def enabled_sources(entry: ConfigEntry) -> list[str]:
+    """The data sources enabled for this entry (pre-1.1.0 entries: Alertswiss)."""
+    return AlertswissCoordinator._option(entry, CONF_DATA_SOURCES, DEFAULT_DATA_SOURCES)
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Swiss Public Alerts from a config entry."""
     if not hass.data.get(f"{DOMAIN}_static_registered"):
@@ -125,19 +193,51 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
         hass.data[f"{DOMAIN}_static_registered"] = True
 
-    coordinator = AlertswissCoordinator(hass, entry)
-    await coordinator.async_config_entry_first_refresh()
+    sources = enabled_sources(entry)
 
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
+    alertswiss = None
+    if SOURCE_ALERTSWISS in sources:
+        alertswiss = AlertswissCoordinator(hass, entry)
+        await alertswiss.async_config_entry_first_refresh()
+
+    hazards = None
+    if SOURCE_HAZARDS in sources:
+        plz = AlertswissCoordinator._option(entry, CONF_PLZ, "")
+        locations = await hass.async_add_executor_job(load_locations)
+        location = find_location(locations, str(plz))
+        if location is None:
+            _LOGGER.error(
+                "Postal code %s not found in the hazard location dataset; "
+                "natural hazard sensors are unavailable",
+                plz,
+            )
+        else:
+            hazards = HazardsCoordinator(hass, entry, location)
+            await hazards.async_config_entry_first_refresh()
+
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = RuntimeData(alertswiss, hazards)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    from . import dashboard
+    if alertswiss is not None:
+        from . import dashboard
 
-    await dashboard.async_ensure_dashboard(hass, entry)
+        await dashboard.async_ensure_dashboard(hass, entry)
 
     async def _options_updated(hass: HomeAssistant, entry: ConfigEntry) -> None:
-        coordinator.apply_options()
-        await coordinator.async_request_refresh()
+        # Source or location changes require a full reload; everything else
+        # (language, severity, interval) is applied in place.
+        new_sources = enabled_sources(entry)
+        new_plz = str(AlertswissCoordinator._option(entry, CONF_PLZ, ""))
+        if set(new_sources) != set(sources) or (
+            SOURCE_HAZARDS in new_sources
+            and (hazards is None or hazards.client.location.plz != new_plz)
+        ):
+            await hass.config_entries.async_reload(entry.entry_id)
+            return
+        for coordinator in (alertswiss, hazards):
+            if coordinator is not None:
+                coordinator.apply_options()
+                await coordinator.async_request_refresh()
 
     entry.async_on_unload(entry.add_update_listener(_options_updated))
     return True

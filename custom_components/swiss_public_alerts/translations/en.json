@@ -3,8 +3,10 @@
     "step": {
       "user": {
         "title": "Swiss Public Alerts",
-        "description": "Official public alerts from Alertswiss (Federal Office for Civil Protection). Whether your home is affected is determined from the alert area polygons and your Home Assistant home location.",
+        "description": "Official public alerts from Alertswiss (Federal Office for Civil Protection) and natural hazard danger levels from the Natural Hazards Portal of the Confederation. Whether your home is affected is determined from the alert area polygons and your Home Assistant home location; the danger levels use the postal code entered below.",
         "data": {
+          "data_sources": "Data sources",
+          "plz": "Postal code (for natural hazard levels)",
           "language": "Language",
           "minimum_severity": "Minimum severity",
           "update_interval": "Update interval"
@@ -12,7 +14,10 @@
       }
     },
     "error": {
-      "cannot_connect": "Could not fetch the Alertswiss feed. Please try again later."
+      "cannot_connect": "Could not fetch the data. Please try again later.",
+      "no_source": "Select at least one data source.",
+      "plz_required": "A Swiss postal code is required for the natural hazard levels.",
+      "plz_unknown": "This postal code was not found in the Natural Hazards Portal location list."
     },
     "abort": {
       "already_configured": "Swiss Public Alerts is already configured."
@@ -23,14 +28,28 @@
       "init": {
         "title": "Swiss Public Alerts options",
         "data": {
+          "data_sources": "Data sources",
+          "plz": "Postal code (for natural hazard levels)",
           "language": "Language",
           "minimum_severity": "Minimum severity",
           "update_interval": "Update interval"
         }
       }
+    },
+    "error": {
+      "cannot_connect": "Could not fetch the data. Please try again later.",
+      "no_source": "Select at least one data source.",
+      "plz_required": "A Swiss postal code is required for the natural hazard levels.",
+      "plz_unknown": "This postal code was not found in the Natural Hazards Portal location list."
     }
   },
   "selector": {
+    "data_sources": {
+      "options": {
+        "alertswiss": "Alertswiss public alerts",
+        "natural_hazards": "Natural hazard danger levels (naturgefahren.ch)"
+      }
+    },
     "language": {
       "options": {
         "de": "German",
@@ -51,7 +70,20 @@
     "sensor": {
       "active_alerts": { "name": "Active alerts Switzerland" },
       "home_alerts": { "name": "Alerts for home location" },
-      "heartbeat_age": { "name": "Feed heartbeat age" }
+      "heartbeat_age": { "name": "Feed heartbeat age" },
+      "hazard_wind": { "name": "Wind danger level" },
+      "hazard_thunderstorm": { "name": "Thunderstorm danger level" },
+      "hazard_rain": { "name": "Rain danger level" },
+      "hazard_snow": { "name": "Snow danger level" },
+      "hazard_slippery_roads": { "name": "Slippery roads danger level" },
+      "hazard_heat_wave": { "name": "Heat wave danger level" },
+      "hazard_frost": { "name": "Frost danger level" },
+      "hazard_forestfire": { "name": "Forest fire danger level" },
+      "hazard_flood": { "name": "Flood danger level" },
+      "hazard_avalanches": { "name": "Avalanche danger level" },
+      "hazard_drought": { "name": "Drought danger level" },
+      "hazard_earthquake": { "name": "Earthquake danger level" },
+      "highest_hazard": { "name": "Highest danger level" }
     },
     "binary_sensor": {
       "home_affected": {

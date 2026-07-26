@@ -3,8 +3,10 @@
     "step": {
       "user": {
         "title": "Swiss Public Alerts",
-        "description": "Offizielle Behördenmeldungen von Alertswiss (Bundesamt für Bevölkerungsschutz). Ob dein Zuhause betroffen ist, wird aus den Gebiets-Polygonen der Meldungen und deinem Home-Assistant-Standort ermittelt.",
+        "description": "Offizielle Behördenmeldungen von Alertswiss (Bundesamt für Bevölkerungsschutz) und Naturgefahren-Gefahrenstufen des Naturgefahrenportals des Bundes. Ob dein Zuhause betroffen ist, wird aus den Gebiets-Polygonen der Meldungen und deinem Home-Assistant-Standort ermittelt; die Gefahrenstufen nutzen die unten eingegebene Postleitzahl.",
         "data": {
+          "data_sources": "Datenquellen",
+          "plz": "Postleitzahl (für Naturgefahren-Stufen)",
           "language": "Sprache",
           "minimum_severity": "Minimaler Schweregrad",
           "update_interval": "Aktualisierungsintervall"
@@ -12,7 +14,10 @@
       }
     },
     "error": {
-      "cannot_connect": "Der Alertswiss-Feed konnte nicht abgerufen werden. Bitte später erneut versuchen."
+      "cannot_connect": "Die Daten konnten nicht abgerufen werden. Bitte später erneut versuchen.",
+      "no_source": "Bitte mindestens eine Datenquelle auswählen.",
+      "plz_required": "Für die Naturgefahren-Stufen wird eine Schweizer Postleitzahl benötigt.",
+      "plz_unknown": "Diese Postleitzahl wurde in der Ortsliste des Naturgefahrenportals nicht gefunden."
     },
     "abort": {
       "already_configured": "Swiss Public Alerts ist bereits konfiguriert."
@@ -23,14 +28,28 @@
       "init": {
         "title": "Swiss Public Alerts Optionen",
         "data": {
+          "data_sources": "Datenquellen",
+          "plz": "Postleitzahl (für Naturgefahren-Stufen)",
           "language": "Sprache",
           "minimum_severity": "Minimaler Schweregrad",
           "update_interval": "Aktualisierungsintervall"
         }
       }
+    },
+    "error": {
+      "cannot_connect": "Die Daten konnten nicht abgerufen werden. Bitte später erneut versuchen.",
+      "no_source": "Bitte mindestens eine Datenquelle auswählen.",
+      "plz_required": "Für die Naturgefahren-Stufen wird eine Schweizer Postleitzahl benötigt.",
+      "plz_unknown": "Diese Postleitzahl wurde in der Ortsliste des Naturgefahrenportals nicht gefunden."
     }
   },
   "selector": {
+    "data_sources": {
+      "options": {
+        "alertswiss": "Alertswiss-Behördenmeldungen",
+        "natural_hazards": "Naturgefahren-Gefahrenstufen (naturgefahren.ch)"
+      }
+    },
     "language": {
       "options": {
         "de": "Deutsch",
@@ -51,7 +70,20 @@
     "sensor": {
       "active_alerts": { "name": "Aktive Meldungen Schweiz" },
       "home_alerts": { "name": "Meldungen für Zuhause" },
-      "heartbeat_age": { "name": "Feed-Heartbeat-Alter" }
+      "heartbeat_age": { "name": "Feed-Heartbeat-Alter" },
+      "hazard_wind": { "name": "Gefahrenstufe Wind" },
+      "hazard_thunderstorm": { "name": "Gefahrenstufe Gewitter" },
+      "hazard_rain": { "name": "Gefahrenstufe Regen" },
+      "hazard_snow": { "name": "Gefahrenstufe Schnee" },
+      "hazard_slippery_roads": { "name": "Gefahrenstufe Glätte" },
+      "hazard_heat_wave": { "name": "Gefahrenstufe Hitze" },
+      "hazard_frost": { "name": "Gefahrenstufe Frost" },
+      "hazard_forestfire": { "name": "Gefahrenstufe Waldbrand" },
+      "hazard_flood": { "name": "Gefahrenstufe Hochwasser" },
+      "hazard_avalanches": { "name": "Gefahrenstufe Lawinen" },
+      "hazard_drought": { "name": "Gefahrenstufe Trockenheit" },
+      "hazard_earthquake": { "name": "Gefahrenstufe Erdbeben" },
+      "highest_hazard": { "name": "Höchste Gefahrenstufe" }
     },
     "binary_sensor": {
       "home_affected": {

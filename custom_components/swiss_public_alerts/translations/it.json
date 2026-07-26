@@ -3,8 +3,10 @@
     "step": {
       "user": {
         "title": "Swiss Public Alerts",
-        "description": "Allerte ufficiali di Alertswiss (Ufficio federale della protezione della popolazione). L'integrazione determina se la tua abitazione è interessata in base ai poligoni delle zone di allerta e alla posizione della tua casa in Home Assistant.",
+        "description": "Allerte ufficiali di Alertswiss (Ufficio federale della protezione della popolazione) e gradi di pericolo naturale del Portale dei pericoli naturali della Confederazione. L'integrazione determina se la tua abitazione è interessata in base ai poligoni delle zone di allerta e alla posizione della tua casa in Home Assistant; i gradi di pericolo utilizzano il codice postale inserito qui sotto.",
         "data": {
+          "data_sources": "Fonti di dati",
+          "plz": "Codice postale (per i gradi di pericolo naturale)",
           "language": "Lingua",
           "minimum_severity": "Gravità minima",
           "update_interval": "Intervallo di aggiornamento"
@@ -12,7 +14,10 @@
       }
     },
     "error": {
-      "cannot_connect": "Impossibile recuperare il feed Alertswiss. Riprova più tardi."
+      "cannot_connect": "Impossibile recuperare i dati. Riprova più tardi.",
+      "no_source": "Seleziona almeno una fonte di dati.",
+      "plz_required": "Per i gradi di pericolo naturale è necessario un codice postale svizzero.",
+      "plz_unknown": "Questo codice postale non è stato trovato nell'elenco delle località del Portale dei pericoli naturali."
     },
     "abort": {
       "already_configured": "Swiss Public Alerts è già configurato."
@@ -23,14 +28,28 @@
       "init": {
         "title": "Opzioni Swiss Public Alerts",
         "data": {
+          "data_sources": "Fonti di dati",
+          "plz": "Codice postale (per i gradi di pericolo naturale)",
           "language": "Lingua",
           "minimum_severity": "Gravità minima",
           "update_interval": "Intervallo di aggiornamento"
         }
       }
+    },
+    "error": {
+      "cannot_connect": "Impossibile recuperare i dati. Riprova più tardi.",
+      "no_source": "Seleziona almeno una fonte di dati.",
+      "plz_required": "Per i gradi di pericolo naturale è necessario un codice postale svizzero.",
+      "plz_unknown": "Questo codice postale non è stato trovato nell'elenco delle località del Portale dei pericoli naturali."
     }
   },
   "selector": {
+    "data_sources": {
+      "options": {
+        "alertswiss": "Allerte ufficiali Alertswiss",
+        "natural_hazards": "Gradi di pericolo naturale (pericoli-naturali.ch)"
+      }
+    },
     "language": {
       "options": {
         "de": "Tedesco",
@@ -51,7 +70,20 @@
     "sensor": {
       "active_alerts": { "name": "Allerte attive Svizzera" },
       "home_alerts": { "name": "Allerte per la posizione di casa" },
-      "heartbeat_age": { "name": "Età heartbeat del feed" }
+      "heartbeat_age": { "name": "Età heartbeat del feed" },
+      "hazard_wind": { "name": "Grado di pericolo vento" },
+      "hazard_thunderstorm": { "name": "Grado di pericolo temporali" },
+      "hazard_rain": { "name": "Grado di pericolo pioggia" },
+      "hazard_snow": { "name": "Grado di pericolo neve" },
+      "hazard_slippery_roads": { "name": "Grado di pericolo strade sdrucciolevoli" },
+      "hazard_heat_wave": { "name": "Grado di pericolo canicola" },
+      "hazard_frost": { "name": "Grado di pericolo gelo" },
+      "hazard_forestfire": { "name": "Grado di pericolo incendi di bosco" },
+      "hazard_flood": { "name": "Grado di pericolo piene" },
+      "hazard_avalanches": { "name": "Grado di pericolo valanghe" },
+      "hazard_drought": { "name": "Grado di pericolo siccità" },
+      "hazard_earthquake": { "name": "Grado di pericolo terremoti" },
+      "highest_hazard": { "name": "Grado di pericolo più alto" }
     },
     "binary_sensor": {
       "home_affected": {

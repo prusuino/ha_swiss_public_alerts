@@ -14,7 +14,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from . import AlertswissCoordinator
+from . import AlertswissCoordinator, RuntimeData
 from .api import Alert
 from .const import ATTRIBUTION, DOMAIN, STATIC_URL_BASE
 
@@ -23,7 +23,10 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up geolocation events and keep them in sync with the feed."""
-    coordinator: AlertswissCoordinator = hass.data[DOMAIN][entry.entry_id]
+    data: RuntimeData = hass.data[DOMAIN][entry.entry_id]
+    if data.alertswiss is None:
+        return
+    coordinator = data.alertswiss
     tracked: dict[str, AlertGeolocationEvent] = {}
 
     @callback

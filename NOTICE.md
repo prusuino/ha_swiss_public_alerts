@@ -10,6 +10,14 @@ This integration fulfills that requirement by setting the `attribution` attribut
 
 The cantonal coats of arms bundled with this integration are official Swiss insignia (public domain as state emblems, sourced from Wikimedia Commons). They are used purely to indicate which canton issued an alert; no affiliation with or endorsement by any authority is implied. The severity symbols are original artwork of this project, merely following the same visual convention (shape/color) as official Swiss alerting so that their meaning is immediately familiar.
 
-This integration is unofficial and not affiliated with, endorsed by, or supported by the FOCP/BABS or Alertswiss. It only reads their publicly published alert feed.
+## Natural Hazards Portal (optional data source)
 
-Official platform: https://www.alert.swiss/
+When enabled, this integration additionally retrieves the current natural hazard danger levels from the **Natural Hazards Portal of the Confederation** (`www.naturgefahren.ch` / `www.natural-hazards.ch`), where the federal specialist agencies (MeteoSwiss, FOEN, SLF, SED) publish their joint hazard assessment. Entities based on this data carry the attribution:
+
+> **Quelle: www.naturgefahren.ch**
+
+Warnings may only be passed on promptly and unaltered; this integration polls the portal's published data at a short interval and does not modify its content. The bundled location-to-warning-region dataset is a snapshot derived from the portal's public location list and is only used to determine which warning regions apply to the configured postal code.
+
+This integration is unofficial and not affiliated with, endorsed by, or supported by the FOCP/BABS, Alertswiss, or the natural hazards specialist agencies of the Confederation. It only reads their publicly published data.
+
+Official platforms: https://www.alert.swiss/ · https://www.naturgefahren.ch/
