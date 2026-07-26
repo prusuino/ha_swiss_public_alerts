@@ -199,6 +199,30 @@ def _entity_ids(hass: HomeAssistant, entry: ConfigEntry) -> dict[str, str]:
     return ids
 
 
+def _hazards_markdown(ids: dict[str, str]) -> str:
+    """Jinja template rendering the official warning texts of active hazards."""
+    entities = ", ".join(
+        f"'{ids[suffix]}'" for suffix in _HAZARD_SUFFIXES[1:] if suffix in ids
+    )
+    return (
+        "{% set entities = [" + entities + "] %}\n"
+        "{% set active = namespace(any=false) %}\n"
+        "{% for e in entities if states(e) | int(0) > 0 %}\n"
+        "{% set active.any = true %}\n"
+        "#### {{ (state_attr(e, 'friendly_name') or e) | replace('Naturgefahrenportal ', '') }}"
+        " — Stufe {{ states(e) }}\n"
+        "{{ state_attr(e, 'description') }}\n"
+        "{% if state_attr(e, 'outlook_level') %}*Vorwarnung: Stufe "
+        "{{ state_attr(e, 'outlook_level') }}*\n{% endif %}"
+        "{% if state_attr(e, 'expires') %}*Gültig bis "
+        "{{ as_timestamp(state_attr(e, 'expires')) | timestamp_custom('%d.%m.%Y %H:%M') }}*\n"
+        "{% endif %}\n"
+        "{% endfor %}\n"
+        "{% if not active.any %}Zurzeit keine Naturgefahren-Warnungen für diesen Ort."
+        "{% endif %}"
+    )
+
+
 def _hazards_section(ids: dict[str, str]) -> dict:
     """Build the natural hazards dashboard section (native cards only)."""
     tiles = [
@@ -231,6 +255,11 @@ def _hazards_section(ids: dict[str, str]) -> dict:
                 "type": "tile",
                 "entity": ids["highest_hazard"],
                 "color": "red",
+                "grid_options": {"columns": 12},
+            },
+            {
+                "type": "markdown",
+                "content": _hazards_markdown(ids),
                 "grid_options": {"columns": 12},
             },
             *tiles,
