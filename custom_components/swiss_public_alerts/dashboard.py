@@ -3,12 +3,15 @@
 Uses Home Assistant's internal Lovelace storage API (there is no public
 integration API for this; the approach is verified against current HA core).
 Dashboard creation is idempotent: once created it is never touched again, so
-user edits survive restarts. Removing the config entry removes the dashboard
-and the card resource again.
+user edits survive restarts. The only exception is additive: when the natural
+hazards data source is enabled later, its section is appended once to the
+existing dashboard (never modifying existing cards). Removing the config
+entry removes the dashboard and the card resource again.
 """
 
 from __future__ import annotations
 
+import json
 import logging
 
 import voluptuous as vol
@@ -54,7 +57,10 @@ async def async_ensure_dashboard(hass: HomeAssistant, entry: ConfigEntry) -> Non
         )
         return
     if DASHBOARD_URL_PATH in lovelace_data.dashboards:
-        return  # already exists — never overwrite user changes
+        # Never overwrite user changes; only append the natural hazards
+        # section once if that data source was enabled after creation.
+        await _async_append_hazards_section(hass, entry, lovelace_data)
+        return
 
     dashboards_collection = ll_dashboard.DashboardsCollection(hass)
     await dashboards_collection.async_load()
@@ -159,15 +165,106 @@ async def async_remove_dashboard(hass: HomeAssistant) -> None:
         _LOGGER.warning("Could not remove the ticker card resource: %s", err)
 
 
+_HAZARD_SUFFIXES = (
+    "highest_hazard",
+    "hazard_wind",
+    "hazard_thunderstorm",
+    "hazard_rain",
+    "hazard_snow",
+    "hazard_slippery_roads",
+    "hazard_heat_wave",
+    "hazard_frost",
+    "hazard_forestfire",
+    "hazard_flood",
+    "hazard_avalanches",
+    "hazard_drought",
+    "hazard_earthquake",
+)
+
+
 def _entity_ids(hass: HomeAssistant, entry: ConfigEntry) -> dict[str, str]:
     """Resolve the entry's entity ids by unique-id suffix."""
     registry = er.async_get(hass)
     ids: dict[str, str] = {}
+    suffixes = (
+        "active_alerts",
+        "home_alerts",
+        "home_affected",
+        "heartbeat_age",
+    ) + _HAZARD_SUFFIXES
     for reg_entry in er.async_entries_for_config_entry(registry, entry.entry_id):
-        for suffix in ("active_alerts", "home_alerts", "home_affected", "heartbeat_age"):
+        for suffix in suffixes:
             if reg_entry.unique_id == f"{entry.entry_id}_{suffix}":
                 ids[suffix] = reg_entry.entity_id
     return ids
+
+
+def _hazards_section(ids: dict[str, str]) -> dict:
+    """Build the natural hazards dashboard section (native cards only)."""
+    tiles = [
+        {
+            "type": "tile",
+            "entity": ids[suffix],
+            "color": "amber",
+            "grid_options": {"columns": 6},
+        }
+        for suffix in _HAZARD_SUFFIXES[1:]
+        if suffix in ids
+    ]
+    return {
+        "type": "grid",
+        "column_span": 2,
+        "cards": [
+            {
+                "type": "heading",
+                "heading": "Naturgefahren",
+                "icon": "mdi:alert-octagram",
+                "badges": [
+                    {
+                        "type": "entity",
+                        "entity": ids["highest_hazard"],
+                        "show_state": True,
+                    }
+                ],
+            },
+            {
+                "type": "tile",
+                "entity": ids["highest_hazard"],
+                "color": "red",
+                "grid_options": {"columns": 12},
+            },
+            *tiles,
+        ],
+    }
+
+
+async def _async_append_hazards_section(
+    hass: HomeAssistant, entry: ConfigEntry, lovelace_data
+) -> None:
+    """Append the hazards section to an existing dashboard exactly once."""
+    ids = _entity_ids(hass, entry)
+    if "highest_hazard" not in ids:
+        return  # hazards source not enabled
+    storage = lovelace_data.dashboards.get(DASHBOARD_URL_PATH)
+    if storage is None:
+        return
+    try:
+        config = await storage.async_load(False)
+    except HomeAssistantError as err:
+        _LOGGER.debug("Could not load dashboard config: %s", err)
+        return
+    if not isinstance(config, dict) or not config.get("views"):
+        return
+    if ids["highest_hazard"] in json.dumps(config):
+        return  # already present (auto-added earlier or placed by the user)
+    sections = config["views"][0].setdefault("sections", [])
+    sections.append(_hazards_section(ids))
+    try:
+        await storage.async_save(config)
+    except HomeAssistantError as err:
+        _LOGGER.warning("Could not add the hazards section to the dashboard: %s", err)
+        return
+    _LOGGER.info("Added the natural hazards section to the Alerts dashboard")
 
 
 def _build_config(hass: HomeAssistant, entry: ConfigEntry) -> dict:
@@ -176,6 +273,10 @@ def _build_config(hass: HomeAssistant, entry: ConfigEntry) -> dict:
     active = ids.get("active_alerts", "sensor.alertswiss_active_alerts")
     home_count = ids.get("home_alerts", "sensor.alertswiss_home_alerts")
     affected = ids.get("home_affected", "binary_sensor.alertswiss_home_affected")
+
+    sections_extra = []
+    if "highest_hazard" in ids:
+        sections_extra.append(_hazards_section(ids))
 
     return {
         "views": [
@@ -247,6 +348,7 @@ def _build_config(hass: HomeAssistant, entry: ConfigEntry) -> dict:
                             },
                         ],
                     },
+                    *sections_extra,
                 ],
             },
         ]
