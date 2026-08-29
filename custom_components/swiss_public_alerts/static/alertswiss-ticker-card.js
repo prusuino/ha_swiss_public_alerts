@@ -364,7 +364,7 @@ class AlertswissAlertCard extends HTMLElement {
     html += `<div class="meta">${awWappen(a.canton_code, 22)}<span class="pub">${awEsc(a.publisher)}</span>`
       + `<span>· ${awEsc(a.event)}</span><span class="chip" style="background:${sevColor}">${awEsc(sevName)}</span></div>`;
     if (a.published) {
-      html += `<div class="time">🕐 ${L.published} ${awDate(a.published, lc)} (${awRelative(a.published, lc)})</div>`;
+      html += `<div class="time">🕐 ${L.published} ${awEsc(awDate(a.published, lc))} (${awRelative(a.published, lc)})</div>`;
     }
     if (c.show_description !== false && a.description) {
       html += `<div class="desc">${awEsc(a.description)}</div>`;
@@ -451,7 +451,7 @@ class AlertswissListCard extends HTMLElement {
         awEsc(a.publisher),
         awEsc(a.event),
         a.nation_wide ? L.nationwide : null,
-        c.show_time !== false && a.published ? `🕐 ${awDate(a.published, lc)}` : null,
+        c.show_time !== false && a.published ? `🕐 ${awEsc(awDate(a.published, lc))}` : null,
         c.show_distance && a.distance_km != null ? `${a.distance_km} km` : null,
       ].filter(Boolean).join(' · ');
       return `<div class="row">${awDot(a.severity)}${awWappen(a.canton_code, 18)}
@@ -560,7 +560,20 @@ window.customCards.push(
  * part changes — it identifies which revision a copy was taken from.
  * ===================================================================== */
 
-const CORE_VERSION = "1.1.0";
+const CORE_VERSION = "1.1.1";
+
+/* 1.1.1 - review follow-ups on the `strategy:` options
+ *   (a) `map: false` only dropped the view with path "map". Where the map is
+ *       a section inside another view (or a card in a panel view) it stayed
+ *       visible. The option now also strips map cards out of every view: a
+ *       section left with nothing but headings is dropped, and a view that
+ *       ends up without any sections or cards is dropped as well.
+ *   (b) The view flavour hardcoded max_columns: 2 and discarded the user's
+ *       `max_columns`. It now uses the option when valid, else the value of
+ *       the first sections view, else 2.
+ *   (c) The view flavour copied only sections and cards, losing a view's
+ *       `header` and `badges`. Both are carried over from the first view
+ *       that has them. */
 
 /* --- Registry access -------------------------------------------------
  * The registries are the only reliable way to find an integration's
@@ -678,20 +691,62 @@ function translator(strings, hass) {
  * They are handled here in the core, so every integration supports the same
  * set without shipping its own option code:
  *
- *   map: false        drop the full-screen map view
+ *   map: false        drop the map: the full-screen map view as well as the
+ *                     map cards inside section and panel views
  *   title: "..."      override the title
- *   max_columns: 3    column count of the generated section views
+ *   max_columns: 3    column count of the generated section views (the view
+ *                     flavour honours it too)
  *
  * Unknown keys are ignored on purpose - a strategy config is free-form, and a
  * typo should not take the dashboard down. */
+const validColumns = (value) => {
+  const cols = Number(value);
+  return Number.isFinite(cols) && cols > 0 ? cols : undefined;
+};
+
+const isMapCard = (card) => Boolean(card) && card.type === "map";
+const isHeadingCard = (card) => Boolean(card) && card.type === "heading";
+
+/* Remove the map cards of one view. A section is dropped once only headings
+ * remain - a heading merely labels the map that was just removed. Returns
+ * null when nothing is left to show; views without a map card come back
+ * untouched. */
+const withoutMapCards = (view) => {
+  let touched = false;
+  const out = { ...view };
+  if (Array.isArray(view.sections)) {
+    out.sections = [];
+    for (const section of view.sections) {
+      const cards = Array.isArray(section.cards) ? section.cards : [];
+      if (!cards.some(isMapCard)) {
+        out.sections.push(section);
+        continue;
+      }
+      touched = true;
+      const rest = cards.filter((c) => !isMapCard(c));
+      if (rest.some((c) => !isHeadingCard(c))) out.sections.push({ ...section, cards: rest });
+    }
+  }
+  if (Array.isArray(view.cards) && view.cards.some(isMapCard)) {
+    touched = true;
+    out.cards = view.cards.filter((c) => !isMapCard(c));
+  }
+  if (!touched) return view;
+  const empty = !(out.sections && out.sections.length) && !(out.cards && out.cards.length);
+  return empty ? null : out;
+};
+
 const applyViewOptions = (views, config) => {
   const cfg = config || {};
   let out = views;
   if (cfg.map === false) {
-    out = out.filter((v) => v.path !== "map");
+    out = out
+      .filter((v) => v.path !== "map")
+      .map(withoutMapCards)
+      .filter(Boolean);
   }
-  const cols = Number(cfg.max_columns);
-  if (Number.isFinite(cols) && cols > 0) {
+  const cols = validColumns(cfg.max_columns);
+  if (cols) {
     out = out.map((v) => (v.type === "sections" ? { ...v, max_columns: cols } : v));
   }
   return out;
@@ -701,7 +756,7 @@ const applyViewOptions = (views, config) => {
  * Section views are merged by concatenating their sections. A panel view (the
  * map) has no sections, so its cards become one full-width section instead -
  * that keeps the map visible rather than silently dropping it. */
-const flattenToView = (views, title, icon) => {
+const flattenToView = (views, title, icon, config) => {
   const sections = [];
   for (const v of views) {
     if (Array.isArray(v.sections) && v.sections.length) {
@@ -717,7 +772,21 @@ const flattenToView = (views, title, icon) => {
       );
     }
   }
-  return { title, icon, type: "sections", max_columns: 2, sections };
+  const sized = views.find((v) => v.type === "sections" && validColumns(v.max_columns));
+  const view = {
+    title,
+    icon,
+    type: "sections",
+    max_columns: validColumns((config || {}).max_columns) ?? (sized ? validColumns(sized.max_columns) : 2),
+    sections,
+  };
+  // header and badges live outside the sections and would be lost by the
+  // merge above - keep the first ones the build produced.
+  const withHeader = views.find((v) => v.header);
+  if (withHeader) view.header = withHeader.header;
+  const withBadges = views.find((v) => Array.isArray(v.badges) && v.badges.length);
+  if (withBadges) view.badges = withBadges.badges;
+  return view;
 };
 
 function defineDashboardStrategy(name, { domain, title, icon, build, strings, description }) {
@@ -761,7 +830,7 @@ function defineDashboardStrategy(name, { domain, title, icon, build, strings, de
   class ViewStrategy extends HTMLElement {
     static async generate(config, hass) {
       const views = await buildViews(config, hass);
-      return flattenToView(views, (config && config.title) || title, icon);
+      return flattenToView(views, (config && config.title) || title, icon, config);
     }
   }
 

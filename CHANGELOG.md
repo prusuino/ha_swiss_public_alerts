@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.3.1 — 2026-08-29
+
+- **Fixed: `map: false` now removes the map.** The option only dropped a view with the path `map`. This integration's strategy places the map as a section inside its single view, so the option had no visible effect. The bundled strategy core (1.1.1) now also strips map cards out of every view, and a section left with nothing but its heading goes with them — the map section disappears, in the dashboard strategy and in the view strategy alike.
+- **Fixed: `max_columns` is honoured by the view strategy.** The view flavour hardcoded two columns and discarded the option; it now uses it, and falls back to the generated view's own column count when the option is missing or invalid.
+- **Fixed: the view strategy dropped the header.** The header text above the sections was lost when the strategy filled a single view of your own dashboard; it is kept now.
+- **Fixed: the published time of an alert is HTML-escaped like every other feed value.** When a date could not be parsed, the alert card and the list card fell back to the raw string from the feed and inserted it into the page unescaped. The Alertswiss feed has always delivered parsable dates, so nothing has shown up wrongly — but the escaping now holds for every feed-derived value without exception.
+- README: the option table describes what `title`, `max_columns` and `map: false` do in this integration's layout, and that the same options apply when the strategy fills a single view.
+- Nothing to do on your side. The card file changed: if the old copy is still served after the update, do a hard reload or raise the `?v=` on the resource URL (e.g. `?v=1.3.1`).
+
 ## 1.3.0 — 2026-08-29
 
 - **Fixed: map markers go unavailable while the Alertswiss feed is unreachable**, as the sensors already did. Until now a marker kept showing its last known alert indefinitely, however stale the data behind it was; it now follows the feed and comes back by itself once the feed does.

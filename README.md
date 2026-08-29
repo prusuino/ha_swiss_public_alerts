@@ -118,8 +118,8 @@ views: []
 | Option | Effect |
 |---|---|
 | `title` | dashboard title |
-| `max_columns` | column count of the generated section views |
-| `map: false` | leave out the full-screen map view |
+| `max_columns` | column count of the generated view (default 2) |
+| `map: false` | leave out the map section |
 
 **One view inside your own dashboard.** Instead of a separate dashboard, let the strategy fill a single view of one you already have. Open your dashboard's raw configuration editor and add a view:
 
@@ -132,7 +132,7 @@ views:
       type: custom:swiss-public-alerts
 ```
 
-That view is regenerated like the full dashboard is, so new config entries still appear by themselves, while every other view stays yours to edit. The same options work here too.
+That view is regenerated like the full dashboard is, so new config entries still appear by themselves, while every other view stays yours to edit. The same options work here too, placed next to `type:` under `strategy:` — `title` then names the view, `max_columns` sets its column count, and `map: false` leaves out the map section.
 
 > **Take control** (⋮ menu) turns a strategy dashboard into a static one you can edit card by card — but it is one-way: the dashboard stops following your config entries from then on. Prefer the two approaches above.
 
