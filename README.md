@@ -22,7 +22,7 @@ Alertswiss publishes every alert with the **exact polygon of the affected area**
 | `sensor` **Active alerts Switzerland** | Number of active alerts nationwide, with per-alert summaries (canton code, severity, published time, distance from home) as attributes |
 | `sensor` **Alerts for home location** | Number of active alerts covering your home |
 | `sensor` **Feed heartbeat age** | Diagnostic: age of the Alertswiss feed heartbeat |
-| `geo_location.*` — see [Entity ids](#entity-ids) | One map marker per alert with an Alertswiss-style severity symbol (red diamond / orange triangle / blue circle) and the alert's summary as attributes; the marker goes unavailable while the feed is unreachable. Hidden from auto-generated maps — they appear only on map cards that reference the `swiss_public_alerts` source explicitly |
+| `geo_location.*` — see [Entity ids](#entity-ids) | One map marker per alert with an Alertswiss-style severity symbol (red diamond / orange triangle / blue circle) and the alert's summary as attributes; the marker goes unavailable while the feed is unreachable and is removed for good, entity registry entry included, once the alert expires. Hidden from auto-generated maps — they appear only on map cards that reference the `swiss_public_alerts` source explicitly |
 
 Test alerts and all-clear messages are filtered out. Entity ids follow your Home Assistant language — see [Entity ids](#entity-ids).
 

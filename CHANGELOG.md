@@ -3,11 +3,12 @@
 ## 1.3.0 — 2026-08-29
 
 - **Fixed: map markers go unavailable while the Alertswiss feed is unreachable**, as the sensors already did. Until now a marker kept showing its last known alert indefinitely, however stale the data behind it was; it now follows the feed and comes back by itself once the feed does.
+- **Fixed: expired alerts left dead markers behind.** When an alert expired, its marker was taken off the map but its entity registry entry stayed and came back on every restart as an `unavailable` entity flagged *restored* — over time that added up to dozens of dead `geo_location.*` entities. Expired alerts are now removed from the entity registry too, and existing leftovers are cleaned up once on the next start. Nothing to do on your side; markers of alerts that are still live are untouched.
 - **New: strategy options.** Keys under `strategy:` are now honoured — `map: false`, `title`, `max_columns`. Unknown keys are ignored, so a typo cannot break the dashboard.
 - **New: view strategy.** Next to the dashboard strategy the card file now also registers `ll-strategy-view-...`, so a single view of your own dashboard can be filled by the strategy (`views: - strategy: {type: custom:...}`) while every other view stays hand-editable. Until now the only way to change anything was *Take control*, which permanently stops the dashboard from following your config entries.
 - Documented: an entity id follows the localized entity name (`sensor.alertswiss_active_alerts_switzerland` on an English instance, `sensor.alertswiss_aktive_meldungen_schweiz` on a German one), so it differs between installations, and a map marker's id follows the alert title. The README now shows how to look up the ids and how to address markers independently of the language — the map card's `geo_location_sources` and the `source` attribute in templates.
 - README: the installation instructions now describe the HACS default listing, with a My Home Assistant button that opens the integration directly in HACS.
-- Nothing to do on your side: no migration runs, no configuration changes, and every existing entity keeps its entity id and its history.
+- Nothing to do on your side: no migration runs, no configuration changes, and every live entity keeps its entity id and its history — the only entities that disappear are the dead markers described above.
 
 ## 1.2.0
 
