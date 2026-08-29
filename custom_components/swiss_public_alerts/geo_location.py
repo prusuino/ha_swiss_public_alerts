@@ -3,6 +3,8 @@
 Each active alert with a geographic area becomes a geolocation event whose
 marker is placed on the area centroid, so alerts show up on the built-in
 Home Assistant map (same pattern as the meteorological geo_location sources).
+Markers follow the coordinator: while the feed is unreachable they are
+unavailable, like the sensors, instead of showing a stale alert.
 """
 
 from __future__ import annotations
@@ -30,6 +32,11 @@ async def async_setup_entry(
 
     @callback
     def _sync() -> None:
+        # Runs on every coordinator notification — including a failed
+        # refresh, which keeps the previous alerts but flips
+        # last_update_success. The in-place update below then writes state
+        # for every surviving marker, which is what publishes the
+        # availability change (see AlertGeolocationEvent.available).
         current = {
             alert.identifier: alert
             for alert in coordinator.relevant_alerts()
@@ -54,7 +61,10 @@ async def async_setup_entry(
 
 
 class AlertGeolocationEvent(GeolocationEvent):
-    """A single alert as a map marker."""
+    """A single alert as a map marker. Lifecycle (appearing/disappearing) is
+    managed by the sync function above; the alert data is refreshed in place
+    on every coordinator update, and availability follows the coordinator's
+    last refresh."""
 
     _attr_attribution = ATTRIBUTION
     _attr_source = DOMAIN
@@ -71,6 +81,8 @@ class AlertGeolocationEvent(GeolocationEvent):
     def __init__(self, coordinator: AlertswissCoordinator, alert: Alert) -> None:
         self._coordinator = coordinator
         self._alert = alert
+        # The config entry id is part of the unique id, so the marker is
+        # scoped to its entry rather than to the alert alone.
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{alert.identifier}"
 
     def update_alert(self, alert: Alert) -> None:
@@ -83,6 +95,16 @@ class AlertGeolocationEvent(GeolocationEvent):
         """Remove this event when the alert disappears from the feed."""
         if self.hass:
             self.hass.async_create_task(self.async_remove(force_remove=True))
+
+    @property
+    def available(self) -> bool:
+        """Like the sensors: while the feed is unreachable the marker is
+        unavailable instead of showing its last known alert indefinitely.
+        Not a CoordinatorEntity (the lifecycle is managed by the sync
+        function), so this reads the coordinator directly; the sync function
+        writes state after every refresh, failed ones included, so a flip
+        reaches the state machine."""
+        return self._coordinator.last_update_success
 
     @property
     def name(self) -> str:

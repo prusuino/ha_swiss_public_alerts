@@ -2,7 +2,7 @@
 
 ![Swiss Public Alerts](assets/readme_header.png)
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 <a href="https://www.buymeacoffee.com/prusuino"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="20"></a>
 
@@ -22,9 +22,9 @@ Alertswiss publishes every alert with the **exact polygon of the affected area**
 | `sensor` **Active alerts Switzerland** | Number of active alerts nationwide, with per-alert summaries (canton code, severity, published time, distance from home) as attributes |
 | `sensor` **Alerts for home location** | Number of active alerts covering your home |
 | `sensor` **Feed heartbeat age** | Diagnostic: age of the Alertswiss feed heartbeat |
-| `geo_location.*` | One map marker per alert with an Alertswiss-style severity symbol (red diamond / orange triangle / blue circle). Hidden from auto-generated maps — they appear only on map cards that reference the `swiss_public_alerts` source explicitly |
+| `geo_location.*` — see [Entity ids](#entity-ids) | One map marker per alert with an Alertswiss-style severity symbol (red diamond / orange triangle / blue circle) and the alert's summary as attributes; the marker goes unavailable while the feed is unreachable. Hidden from auto-generated maps — they appear only on map cards that reference the `swiss_public_alerts` source explicitly |
 
-Entity IDs follow your Home Assistant language; test alerts and all-clear messages are filtered out.
+Test alerts and all-clear messages are filtered out. Entity ids follow your Home Assistant language — see [Entity ids](#entity-ids).
 
 ## Natural hazard danger levels (optional)
 
@@ -38,6 +38,33 @@ When the **"Natural hazard danger levels"** data source is enabled, the integrat
 The two sources complement each other: Alertswiss carries the **official alerts and cantonal orders** (e.g. a fire ban), the portal carries the underlying **danger levels for every process at every level** — including the moderate levels that never reach Alertswiss. The same five-level federal danger scale is used by both.
 
 Both data sources can be enabled or disabled at any time via the integration options; the default is Alertswiss only.
+
+## Entity ids
+
+The entity ids are not fixed: Home Assistant derives the object id from the entity's name when the entity is first created, and the entity names are localized. The same sensor is `sensor.alertswiss_active_alerts_switzerland` on an English instance and `sensor.alertswiss_aktive_meldungen_schweiz` on a German one; the binary sensor is `binary_sensor.alertswiss_home_location_affected` / `binary_sensor.alertswiss_zuhause_betroffen`, a danger level `sensor.naturgefahrenportal_wind_danger_level` / `sensor.naturgefahrenportal_gefahrenstufe_wind` (French `sensor.alertswiss_alertes_actives_suisse`, Italian `sensor.alertswiss_allerte_attive_svizzera`, and so on). The examples in this README use the English form. To find yours, open **Settings → Devices & services → Swiss Public Alerts**: the *Alertswiss* and *Naturgefahrenportal* devices list every entity with its id. Each entity also has a fixed unique id (the config entry plus a key such as `active_alerts` or `home_affected`), which is what the bundled dashboard strategy uses to find the entities — so it works in any language.
+
+The map markers are different again: a marker is named after the alert's title, so its object id changes from alert to alert (`geo_location.waldbrandgefahr_kanton_bern` style, in the configured feed language). Do not address markers by entity id — use their `source` attribute, which is always `swiss_public_alerts`:
+
+- **Map card** — `geo_location_sources` draws every marker of this integration (also the ones hidden from the auto-generated overview) and follows alerts as they come and go:
+
+  ```yaml
+  type: map
+  geo_location_sources:
+    - swiss_public_alerts
+  entities:
+    - zone.home
+  ```
+
+- **Templates** — filter the `geo_location` domain on the `source` attribute instead of naming entities:
+
+  ```jinja
+  {{ states.geo_location
+     | selectattr('attributes.source', 'eq', 'swiss_public_alerts')
+     | selectattr('attributes.severity', 'eq', 'severe')
+     | map(attribute='name') | list }}
+  ```
+
+  This lists the current alarms (severity *severe*), in any language.
 
 ## Bundled cards & dashboard
 
@@ -137,7 +164,7 @@ entities:
 default_zoom: 8
 ```
 
-Replace the entity IDs with your own — they follow your Home Assistant language.
+The entity ids above are the English form; on a German, French or Italian instance they differ — see [Entity ids](#entity-ids) for the localized forms and how to look yours up.
 
 > **After updating the integration:** the card is served with long-lived cache headers, so your browser may keep the old copy. If a new card feature does not show up, do a hard reload (Ctrl+F5 / Cmd+Shift+R), or append a version to the resource URL (e.g. `/swiss_public_alerts/static/alertswiss-ticker-card.js?v=2`).
 
@@ -149,9 +176,13 @@ Config flow, entity names, and the bundled cards follow your Home Assistant lang
 
 ### HACS (recommended)
 
-1. In HACS, go to **Integrations → ⋮ → Custom repositories**, add this repository URL with category **Integration**.
-2. Search for **"Swiss Public Alerts"** and install.
-3. Restart Home Assistant.
+1. Open **HACS**, search for **"Swiss Public Alerts"** and download it — or use the button, which opens the integration directly in your HACS:
+
+   [![Open in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=prusuino&repository=ha_swiss_public_alerts&category=integration)
+
+2. Restart Home Assistant.
+
+Until the integration shows up in the HACS search, the button above adds it as a custom repository.
 
 ### Manual
 
@@ -170,7 +201,7 @@ All options can be changed later via the integration's **Configure** button with
 
 ## Example automation
 
-The binary sensor is designed for notifications — the alert text and the official behaviour instructions are right there in its attributes:
+The binary sensor is designed for notifications — the alert text and the official behaviour instructions are right there in its attributes. The example uses the English entity id; see [Entity ids](#entity-ids) for yours:
 
 ```yaml
 triggers:
@@ -192,7 +223,7 @@ This integration reads the publicly published Alertswiss feed. That content is c
 
 ## Notes
 
-- The feed endpoint is the one the Alertswiss website itself uses, and the danger levels come from the published data of the Natural Hazards Portal website; neither is a formally documented API and both may change without notice. If a source becomes unreachable or changes, its entities become `unavailable` rather than reporting stale data.
+- The feed endpoint is the one the Alertswiss website itself uses, and the danger levels come from the published data of the Natural Hazards Portal website; neither is a formally documented API and both may change without notice. If a source becomes unreachable or changes, its entities — the map markers included — become `unavailable` rather than reporting stale data.
 - The postal-code-to-warning-region mapping is bundled with the integration as a snapshot of the portal's public location list; it is refreshed with integration updates.
 - Alert areas without polygons (rare) cannot be matched against your home; nationwide alerts always match.
 - This integration is unofficial and not affiliated with, endorsed by, or supported by the FOCP/BABS or Alertswiss.
