@@ -3,11 +3,11 @@
   "name": "Swiss Public Alerts",
   "codeowners": ["@prusuino"],
   "config_flow": true,
-  "dependencies": ["http", "lovelace"],
+  "dependencies": ["http"],
   "documentation": "https://github.com/prusuino/ha_swiss_public_alerts",
   "integration_type": "service",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/prusuino/ha_swiss_public_alerts/issues",
   "requirements": [],
-  "version": "1.1.0"
+  "version": "1.2.0"
 }

@@ -39,11 +39,11 @@ The two sources complement each other: Alertswiss carries the **official alerts 
 
 Both data sources can be enabled or disabled at any time via the integration options; the default is Alertswiss only.
 
-## Bundled dashboard & cards
+## Bundled cards & dashboard
 
-![The auto-created Alerts dashboard](assets/screenshot_dashboard.png)
+![The Alerts dashboard](assets/screenshot_dashboard.png)
 
-The integration automatically creates an **"Alerts" dashboard** on first setup (and removes it again if you remove the integration — your own edits to it are never overwritten). With the natural hazards source enabled, the dashboard also shows the danger-level tiles and the official warning texts of all active hazards. It also registers three Lovelace cards, all with a **visual editor** and available in the normal card picker for use on any dashboard:
+The integration ships three Lovelace cards, all with a **visual editor** and available in the normal card picker:
 
 | Card | Description |
 |---|---|
@@ -52,6 +52,59 @@ The integration automatically creates an **"Alerts" dashboard** on first setup (
 | **Alertswiss List** (`custom:alertswiss-list-card`) | A compact, filterable list of alerts with coat of arms, severity dot, published time and distance |
 
 Ticker and list can be **filtered** in the visual editor: by canton(s), by maximum distance from home, and by minimum severity. Nationwide alerts always pass the filters.
+
+The integration serves the card file but does not write to your dashboard configuration — registering the resource and building a dashboard are two short, one-time steps.
+
+### 1. Register the card resource (once)
+
+1. Go to **Settings → Dashboards → ⋮ (top right) → Resources → + Add resource**. The *Resources* entry is only shown when **Advanced mode** is enabled in your user profile (click your name at the bottom of the sidebar).
+2. URL: `/swiss_public_alerts/static/alertswiss-ticker-card.js`
+3. Resource type: **JavaScript module**
+4. Reload the page.
+
+### 2a. Ready-made dashboard (recommended)
+
+The integration includes a **dashboard strategy** that builds the whole dashboard for you at display time — ticker, a "At home" section, the map, the full list, and the natural hazard levels when that source is enabled. Nothing is written to your configuration, and the dashboard follows along when config entries are added or removed.
+
+Create a new empty dashboard (**Settings → Dashboards → + Add dashboard**; the strategy also appears in that dialog), then open **⋮ → Raw configuration editor** and replace its contents with:
+
+```yaml
+strategy:
+  type: custom:swiss-public-alerts
+views: []
+```
+
+### 2b. Or build the cards yourself
+
+```yaml
+type: custom:alertswiss-ticker-card
+entity: sensor.alertswiss_active_alerts_switzerland
+```
+
+```yaml
+type: custom:alertswiss-alert-card
+entity: binary_sensor.alertswiss_home_location_affected
+```
+
+```yaml
+type: custom:alertswiss-list-card
+entity: sensor.alertswiss_active_alerts_switzerland
+show_time: true
+show_distance: true
+```
+
+```yaml
+type: map
+geo_location_sources:
+  - swiss_public_alerts
+entities:
+  - zone.home
+default_zoom: 8
+```
+
+Replace the entity IDs with your own — they follow your Home Assistant language.
+
+> **After updating the integration:** the card is served with long-lived cache headers, so your browser may keep the old copy. If a new card feature does not show up, do a hard reload (Ctrl+F5 / Cmd+Shift+R), or append a version to the resource URL (e.g. `/swiss_public_alerts/static/alertswiss-ticker-card.js?v=2`).
 
 ## Language
 
@@ -76,7 +129,7 @@ Config flow, entity names, and the bundled cards follow your Home Assistant lang
 2. Search for **"Swiss Public Alerts"**.
 3. Select the **data sources** (Alertswiss alerts and/or natural hazard danger levels), and for the danger levels enter your **Swiss postal code**.
 4. Choose the feed language, the minimum severity to track (information / warning / alarm), and the update interval.
-5. Done — the entities, the map markers, and the "Alerts" dashboard appear automatically.
+5. Done — the entities and the map markers appear automatically. For a dashboard, see [Bundled cards & dashboard](#bundled-cards--dashboard).
 
 All options can be changed later via the integration's **Configure** button without re-adding it.
 

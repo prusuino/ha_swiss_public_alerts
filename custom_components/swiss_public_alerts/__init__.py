@@ -218,11 +218,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = RuntimeData(alertswiss, hazards)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    if alertswiss is not None:
-        from . import dashboard
-
-        await dashboard.async_ensure_dashboard(hass, entry)
-
     async def _options_updated(hass: HomeAssistant, entry: ConfigEntry) -> None:
         # Source or location changes require a full reload; everything else
         # (language, severity, interval) is applied in place.
@@ -249,10 +244,3 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
     return unload_ok
-
-
-async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Clean up the auto-created dashboard when the integration is removed."""
-    from . import dashboard
-
-    await dashboard.async_remove_dashboard(hass)

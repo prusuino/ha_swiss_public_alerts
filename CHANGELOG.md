@@ -1,5 +1,47 @@
 # Changelog
 
+## 1.2.0
+
+The integration no longer creates or deletes dashboards and Lovelace
+resources. Writing into another component's storage is not something an
+integration should do on its own initiative, and the previous implementation
+relied on internal Home Assistant APIs that carry no stability guarantee.
+
+**Breaking:**
+
+- The automatically created "Alerts" dashboard is gone. Existing dashboards
+  are left untouched — this release simply stops creating, extending and
+  deleting them. If you want to keep the dashboard you already have, do
+  nothing; it is now yours to edit freely.
+- The bundled cards are no longer registered as a Lovelace resource
+  automatically. Register the file once under **Settings → Dashboards → ⋮ →
+  Resources** with the URL `/swiss_public_alerts/static/alertswiss-ticker-card.js`
+  and type *JavaScript module*.
+
+**New:**
+
+- A **dashboard strategy** replaces the auto-created dashboard. It builds the
+  same layout — ticker, "At home" section, map, full list, and the natural
+  hazard levels when enabled — but generates it in the browser at display
+  time, without writing anything to your Lovelace storage. Create an empty
+  dashboard and set `strategy: {type: custom:swiss-public-alerts}` in the raw
+  configuration editor; the README has step-by-step instructions. Unlike a
+  copied YAML config, it follows along when config entries are added or
+  removed.
+
+**Fixed:**
+
+- Map marker entities that a user made visible by hand are no longer hidden
+  again on every restart. New entities are still hidden by default so they
+  don't flood the auto-generated overview map; existing ones are no longer
+  rewritten.
+
+**Other:**
+
+- Minimum Home Assistant version declared as 2024.12.0, matching what the
+  options flow actually requires. It was previously declared as 2024.7.0,
+  where the options dialog would have failed.
+
 ## 1.1.0
 
 - New optional data source: natural hazard danger levels from the Natural

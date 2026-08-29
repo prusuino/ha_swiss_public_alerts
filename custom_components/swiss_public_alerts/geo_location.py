@@ -11,7 +11,6 @@ from homeassistant.components.geo_location import GeolocationEvent
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfLength
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import AlertswissCoordinator, RuntimeData
@@ -64,23 +63,15 @@ class AlertGeolocationEvent(GeolocationEvent):
     _attr_icon = "mdi:alert"
     # Hidden from auto-generated maps (default map dashboard / strategies) so
     # alerts only appear on map cards that reference the source explicitly.
+    # This applies to entities registered for the first time; whether an
+    # existing entity stays hidden is the user's decision alone and is never
+    # rewritten from here.
     _attr_entity_registry_visible_default = False
 
     def __init__(self, coordinator: AlertswissCoordinator, alert: Alert) -> None:
         self._coordinator = coordinator
         self._alert = alert
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{alert.identifier}"
-
-    async def async_added_to_hass(self) -> None:
-        await super().async_added_to_hass()
-        # Retroactively hide entities registered before visible_default was
-        # introduced; never overrides an explicit user choice (hidden_by set).
-        registry = er.async_get(self.hass)
-        entry = registry.async_get(self.entity_id)
-        if entry is not None and entry.hidden_by is None:
-            registry.async_update_entity(
-                self.entity_id, hidden_by=er.RegistryEntryHider.INTEGRATION
-            )
 
     def update_alert(self, alert: Alert) -> None:
         """Refresh the underlying alert data."""
