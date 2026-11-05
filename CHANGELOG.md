@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.2 — 2026-11-05
+
+- **Maintenance release for the Home Assistant Marketplace.** Home Assistant 2026.11 replaces HACS with the built-in Marketplace (Settings → Marketplace); the README now describes installation and updates through it. The release ships the integration as a zip asset, which the Marketplace (and HACS) download in one piece.
+- **Changed: the declared minimum Home Assistant version is 2025.4** (was 2024.12). The code itself needs nothing newer than before; this aligns the floor across the author's integrations to the version they are tested against.
+- No functional changes. Existing entities, their ids and your configuration are unchanged.
+
 ## 1.3.1 — 2026-08-29
 
 - **Fixed: `map: false` now removes the map.** The option only dropped a view with the path `map`. This integration's strategy places the map as a section inside its single view, so the option had no visible effect. The bundled strategy core (1.1.1) now also strips map cards out of every view, and a section left with nothing but its heading goes with them — the map section disappears, in the dashboard strategy and in the view strategy alike.
