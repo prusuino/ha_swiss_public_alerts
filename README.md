@@ -250,7 +250,7 @@ This integration reads the publicly published Alertswiss feed. That content is c
 - Alert areas without polygons (rare) cannot be matched against your home; nationwide alerts always match.
 - This integration is unofficial and not affiliated with, endorsed by, or supported by the FOCP/BABS or Alertswiss.
 - **This is informational only.** For official alerting, use the [Alertswiss app](https://www.alert.swiss/) with its push notifications — it is the authoritative channel, works when your smart home does not, and covers you when you are away from home.
-- **Download diagnostics** (entry menu under **Settings → Devices & services**) gives the entry's configuration, what the integration last fetched and the current state of its entities, with coordinates and credentials redacted — attach it to an issue report when something looks wrong.
+- **Download diagnostics** (entry menu under **Settings → Devices & services**) gives the entry's configuration, what the integration last fetched and the current state of its entities, with coordinates, credentials and the entry's title and unique id redacted. Entity ids and names stay readable and can contain a place or stop name, so look through the file before attaching it to a public issue.
 
 ## Disclaimer
 
