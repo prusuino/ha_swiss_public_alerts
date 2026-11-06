@@ -1,0 +1,25 @@
+.condition_common_fields: &condition_common_fields
+  behavior:
+    required: true
+    default: any
+    selector:
+      automation_behavior:
+        mode: condition
+  for:
+    required: true
+    default: 00:00:00
+    selector:
+      duration:
+
+.home_target: &home_target
+  entity:
+    - integration: swiss_public_alerts
+      domain: binary_sensor
+
+home_is_affected:
+  fields: *condition_common_fields
+  target: *home_target
+
+home_is_not_affected:
+  fields: *condition_common_fields
+  target: *home_target

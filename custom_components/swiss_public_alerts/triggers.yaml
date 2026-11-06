@@ -1,0 +1,32 @@
+.trigger_common_fields: &trigger_common_fields
+  behavior:
+    required: true
+    default: each
+    selector:
+      automation_behavior:
+        mode: trigger
+  for:
+    required: true
+    default: 00:00:00
+    selector:
+      duration:
+
+.home_target: &home_target
+  entity:
+    - integration: swiss_public_alerts
+      domain: binary_sensor
+
+home_alert_started:
+  fields: *trigger_common_fields
+  target: *home_target
+
+home_alert_cleared:
+  fields: *trigger_common_fields
+  target: *home_target
+
+alert_count_increased:
+  fields: *trigger_common_fields
+  target:
+    entity:
+      - integration: swiss_public_alerts
+        domain: sensor

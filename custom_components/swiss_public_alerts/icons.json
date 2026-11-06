@@ -1,0 +1,21 @@
+{
+  "triggers": {
+    "home_alert_started": {
+      "trigger": "mdi:home-alert"
+    },
+    "home_alert_cleared": {
+      "trigger": "mdi:home-outline"
+    },
+    "alert_count_increased": {
+      "trigger": "mdi:alert-plus"
+    }
+  },
+  "conditions": {
+    "home_is_affected": {
+      "condition": "mdi:home-alert"
+    },
+    "home_is_not_affected": {
+      "condition": "mdi:home-outline"
+    }
+  }
+}

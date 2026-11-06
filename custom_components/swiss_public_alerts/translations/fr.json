@@ -68,27 +68,126 @@
   },
   "entity": {
     "sensor": {
-      "active_alerts": { "name": "Alertes actives Suisse" },
-      "home_alerts": { "name": "Alertes pour le domicile" },
-      "heartbeat_age": { "name": "Âge du heartbeat du flux" },
-      "hazard_wind": { "name": "Degré de danger vent" },
-      "hazard_thunderstorm": { "name": "Degré de danger orages" },
-      "hazard_rain": { "name": "Degré de danger pluie" },
-      "hazard_snow": { "name": "Degré de danger neige" },
-      "hazard_slippery_roads": { "name": "Degré de danger routes glissantes" },
-      "hazard_heat_wave": { "name": "Degré de danger canicule" },
-      "hazard_frost": { "name": "Degré de danger gel" },
-      "hazard_forestfire": { "name": "Degré de danger incendie de forêt" },
-      "hazard_flood": { "name": "Degré de danger crues" },
-      "hazard_avalanches": { "name": "Degré de danger avalanches" },
-      "hazard_drought": { "name": "Degré de danger sécheresse" },
-      "hazard_earthquake": { "name": "Degré de danger séismes" },
-      "highest_hazard": { "name": "Degré de danger le plus élevé" }
+      "active_alerts": {
+        "name": "Alertes actives Suisse"
+      },
+      "home_alerts": {
+        "name": "Alertes pour le domicile"
+      },
+      "heartbeat_age": {
+        "name": "Âge du heartbeat du flux"
+      },
+      "hazard_wind": {
+        "name": "Degré de danger vent"
+      },
+      "hazard_thunderstorm": {
+        "name": "Degré de danger orages"
+      },
+      "hazard_rain": {
+        "name": "Degré de danger pluie"
+      },
+      "hazard_snow": {
+        "name": "Degré de danger neige"
+      },
+      "hazard_slippery_roads": {
+        "name": "Degré de danger routes glissantes"
+      },
+      "hazard_heat_wave": {
+        "name": "Degré de danger canicule"
+      },
+      "hazard_frost": {
+        "name": "Degré de danger gel"
+      },
+      "hazard_forestfire": {
+        "name": "Degré de danger incendie de forêt"
+      },
+      "hazard_flood": {
+        "name": "Degré de danger crues"
+      },
+      "hazard_avalanches": {
+        "name": "Degré de danger avalanches"
+      },
+      "hazard_drought": {
+        "name": "Degré de danger sécheresse"
+      },
+      "hazard_earthquake": {
+        "name": "Degré de danger séismes"
+      },
+      "highest_hazard": {
+        "name": "Degré de danger le plus élevé"
+      }
     },
     "binary_sensor": {
       "home_affected": {
         "name": "Domicile concerné",
-        "state": { "on": "Concerné", "off": "Non concerné" }
+        "state": {
+          "on": "Concerné",
+          "off": "Non concerné"
+        }
+      }
+    }
+  },
+  "triggers": {
+    "home_alert_started": {
+      "name": "Alerte pour le domicile commencée",
+      "description": "Se déclenche quand une alerte Alertswiss commence à couvrir l'emplacement du domicile de Home Assistant.",
+      "fields": {
+        "behavior": {
+          "name": "Déclencher quand"
+        },
+        "for": {
+          "name": "Pendant au moins"
+        }
+      }
+    },
+    "home_alert_cleared": {
+      "name": "Alerte pour le domicile terminée",
+      "description": "Se déclenche quand plus aucune alerte Alertswiss ne couvre le domicile.",
+      "fields": {
+        "behavior": {
+          "name": "Déclencher quand"
+        },
+        "for": {
+          "name": "Pendant au moins"
+        }
+      }
+    },
+    "alert_count_increased": {
+      "name": "Nombre d'alertes en hausse",
+      "description": "Se déclenche quand un capteur de comptage augmente : une nouvelle alerte a été publiée (toute la Suisse ou le domicile, selon le capteur).",
+      "fields": {
+        "behavior": {
+          "name": "Déclencher quand"
+        },
+        "for": {
+          "name": "Pendant au moins"
+        }
+      }
+    }
+  },
+  "conditions": {
+    "home_is_affected": {
+      "name": "Le domicile est concerné",
+      "description": "Vérifie si une alerte Alertswiss couvre le domicile.",
+      "fields": {
+        "behavior": {
+          "name": "Condition remplie si"
+        },
+        "for": {
+          "name": "Pendant au moins"
+        }
+      }
+    },
+    "home_is_not_affected": {
+      "name": "Le domicile n'est pas concerné",
+      "description": "Vérifie qu'aucune alerte Alertswiss ne couvre le domicile.",
+      "fields": {
+        "behavior": {
+          "name": "Condition remplie si"
+        },
+        "for": {
+          "name": "Pendant au moins"
+        }
       }
     }
   }

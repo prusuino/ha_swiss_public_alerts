@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.0 — 2026-11-06
+
+- **New: triggers and conditions in the automation editor** (Home Assistant 2026.10 / 2026.11 or newer). *Alert for the home location started*, *… cleared* and *Alert count increased* appear in the trigger list, *Home location is affected* and *… is not affected* in the condition list, in all four languages. Each targets the integration's own entities, with the usual *for* and behaviour options. On older versions the entries are simply not offered.
+- **New: a blueprint, *notify on an alert for the home location*.** One-click import from the README: picks the "home location affected" sensor and your phone, and sends title, publisher, description and the official behaviour instructions; an action field takes your own steps with the text as `{{ message }}`.
+
 ## 1.3.2 — 2026-11-05
 
 - **Maintenance release for the Home Assistant Marketplace.** Home Assistant 2026.11 replaces HACS with the built-in Marketplace (Settings → Marketplace); the README now describes installation and updates through it. The release ships the integration as a zip asset, which the Marketplace (and HACS) download in one piece.

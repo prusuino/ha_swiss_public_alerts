@@ -199,7 +199,29 @@ The integration is listed in the Marketplace default catalog (formerly the HACS 
 
 All options can be changed later via the integration's **Configure** button without re-adding it.
 
-## Example automation
+## Automations
+
+### Blueprint: notify on an alert for the home location
+
+The repository ships a blueprint that sends a notification to your phone when an Alertswiss alert covers your home location: title, publisher, the official description and the behaviour instructions. Import it once, then create an automation from it and pick the "home location affected" sensor and your phone:
+
+[![Import blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fprusuino%2Fha_swiss_public_alerts%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fhome_alert_notification.yaml)
+
+An action field takes your own steps (a text-to-speech announcement, lights); the text is available there as `{{ message }}`.
+
+### Triggers and conditions in the automation editor
+
+On Home Assistant 2026.10 or newer the integration adds its own entries to the automation editor:
+
+| Trigger | Fires when |
+|---|---|
+| **Alert for the home location started** | the "home location affected" sensor switches on |
+| **Alert for the home location cleared** | it switches off |
+| **Alert count increased** | a count sensor goes up – a new alert was published, for all of Switzerland or for the home location, depending on the sensor you target |
+
+On 2026.11 or newer there are also two conditions, **Home location is affected** and **Home location is not affected**. Each entry targets the integration's own entities; the usual *for* duration and behaviour options apply.
+
+### Building it yourself
 
 The binary sensor is designed for notifications — the alert text and the official behaviour instructions are right there in its attributes. The example uses the English entity id; see [Entity ids](#entity-ids) for yours:
 

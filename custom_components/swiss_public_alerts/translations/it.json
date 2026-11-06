@@ -68,27 +68,126 @@
   },
   "entity": {
     "sensor": {
-      "active_alerts": { "name": "Allerte attive Svizzera" },
-      "home_alerts": { "name": "Allerte per la posizione di casa" },
-      "heartbeat_age": { "name": "Età heartbeat del feed" },
-      "hazard_wind": { "name": "Grado di pericolo vento" },
-      "hazard_thunderstorm": { "name": "Grado di pericolo temporali" },
-      "hazard_rain": { "name": "Grado di pericolo pioggia" },
-      "hazard_snow": { "name": "Grado di pericolo neve" },
-      "hazard_slippery_roads": { "name": "Grado di pericolo strade sdrucciolevoli" },
-      "hazard_heat_wave": { "name": "Grado di pericolo canicola" },
-      "hazard_frost": { "name": "Grado di pericolo gelo" },
-      "hazard_forestfire": { "name": "Grado di pericolo incendi di bosco" },
-      "hazard_flood": { "name": "Grado di pericolo piene" },
-      "hazard_avalanches": { "name": "Grado di pericolo valanghe" },
-      "hazard_drought": { "name": "Grado di pericolo siccità" },
-      "hazard_earthquake": { "name": "Grado di pericolo terremoti" },
-      "highest_hazard": { "name": "Grado di pericolo più alto" }
+      "active_alerts": {
+        "name": "Allerte attive Svizzera"
+      },
+      "home_alerts": {
+        "name": "Allerte per la posizione di casa"
+      },
+      "heartbeat_age": {
+        "name": "Età heartbeat del feed"
+      },
+      "hazard_wind": {
+        "name": "Grado di pericolo vento"
+      },
+      "hazard_thunderstorm": {
+        "name": "Grado di pericolo temporali"
+      },
+      "hazard_rain": {
+        "name": "Grado di pericolo pioggia"
+      },
+      "hazard_snow": {
+        "name": "Grado di pericolo neve"
+      },
+      "hazard_slippery_roads": {
+        "name": "Grado di pericolo strade sdrucciolevoli"
+      },
+      "hazard_heat_wave": {
+        "name": "Grado di pericolo canicola"
+      },
+      "hazard_frost": {
+        "name": "Grado di pericolo gelo"
+      },
+      "hazard_forestfire": {
+        "name": "Grado di pericolo incendi di bosco"
+      },
+      "hazard_flood": {
+        "name": "Grado di pericolo piene"
+      },
+      "hazard_avalanches": {
+        "name": "Grado di pericolo valanghe"
+      },
+      "hazard_drought": {
+        "name": "Grado di pericolo siccità"
+      },
+      "hazard_earthquake": {
+        "name": "Grado di pericolo terremoti"
+      },
+      "highest_hazard": {
+        "name": "Grado di pericolo più alto"
+      }
     },
     "binary_sensor": {
       "home_affected": {
         "name": "Casa interessata",
-        "state": { "on": "Interessata", "off": "Non interessata" }
+        "state": {
+          "on": "Interessata",
+          "off": "Non interessata"
+        }
+      }
+    }
+  },
+  "triggers": {
+    "home_alert_started": {
+      "name": "Allerta per il domicilio iniziata",
+      "description": "Si attiva quando un'allerta Alertswiss inizia a riguardare la posizione di casa di Home Assistant.",
+      "fields": {
+        "behavior": {
+          "name": "Attiva quando"
+        },
+        "for": {
+          "name": "Per almeno"
+        }
+      }
+    },
+    "home_alert_cleared": {
+      "name": "Allerta per il domicilio terminata",
+      "description": "Si attiva quando nessuna allerta Alertswiss riguarda più il domicilio.",
+      "fields": {
+        "behavior": {
+          "name": "Attiva quando"
+        },
+        "for": {
+          "name": "Per almeno"
+        }
+      }
+    },
+    "alert_count_increased": {
+      "name": "Numero di allerte aumentato",
+      "description": "Si attiva quando un sensore contatore aumenta: è stata pubblicata una nuova allerta (tutta la Svizzera o il domicilio, a seconda del sensore).",
+      "fields": {
+        "behavior": {
+          "name": "Attiva quando"
+        },
+        "for": {
+          "name": "Per almeno"
+        }
+      }
+    }
+  },
+  "conditions": {
+    "home_is_affected": {
+      "name": "Il domicilio è interessato",
+      "description": "Verifica se un'allerta Alertswiss riguarda il domicilio.",
+      "fields": {
+        "behavior": {
+          "name": "Condizione soddisfatta se"
+        },
+        "for": {
+          "name": "Per almeno"
+        }
+      }
+    },
+    "home_is_not_affected": {
+      "name": "Il domicilio non è interessato",
+      "description": "Verifica che nessuna allerta Alertswiss riguardi il domicilio.",
+      "fields": {
+        "behavior": {
+          "name": "Condizione soddisfatta se"
+        },
+        "for": {
+          "name": "Per almeno"
+        }
       }
     }
   }

@@ -68,27 +68,126 @@
   },
   "entity": {
     "sensor": {
-      "active_alerts": { "name": "Active alerts Switzerland" },
-      "home_alerts": { "name": "Alerts for home location" },
-      "heartbeat_age": { "name": "Feed heartbeat age" },
-      "hazard_wind": { "name": "Wind danger level" },
-      "hazard_thunderstorm": { "name": "Thunderstorm danger level" },
-      "hazard_rain": { "name": "Rain danger level" },
-      "hazard_snow": { "name": "Snow danger level" },
-      "hazard_slippery_roads": { "name": "Slippery roads danger level" },
-      "hazard_heat_wave": { "name": "Heat wave danger level" },
-      "hazard_frost": { "name": "Frost danger level" },
-      "hazard_forestfire": { "name": "Forest fire danger level" },
-      "hazard_flood": { "name": "Flood danger level" },
-      "hazard_avalanches": { "name": "Avalanche danger level" },
-      "hazard_drought": { "name": "Drought danger level" },
-      "hazard_earthquake": { "name": "Earthquake danger level" },
-      "highest_hazard": { "name": "Highest danger level" }
+      "active_alerts": {
+        "name": "Active alerts Switzerland"
+      },
+      "home_alerts": {
+        "name": "Alerts for home location"
+      },
+      "heartbeat_age": {
+        "name": "Feed heartbeat age"
+      },
+      "hazard_wind": {
+        "name": "Wind danger level"
+      },
+      "hazard_thunderstorm": {
+        "name": "Thunderstorm danger level"
+      },
+      "hazard_rain": {
+        "name": "Rain danger level"
+      },
+      "hazard_snow": {
+        "name": "Snow danger level"
+      },
+      "hazard_slippery_roads": {
+        "name": "Slippery roads danger level"
+      },
+      "hazard_heat_wave": {
+        "name": "Heat wave danger level"
+      },
+      "hazard_frost": {
+        "name": "Frost danger level"
+      },
+      "hazard_forestfire": {
+        "name": "Forest fire danger level"
+      },
+      "hazard_flood": {
+        "name": "Flood danger level"
+      },
+      "hazard_avalanches": {
+        "name": "Avalanche danger level"
+      },
+      "hazard_drought": {
+        "name": "Drought danger level"
+      },
+      "hazard_earthquake": {
+        "name": "Earthquake danger level"
+      },
+      "highest_hazard": {
+        "name": "Highest danger level"
+      }
     },
     "binary_sensor": {
       "home_affected": {
         "name": "Home location affected",
-        "state": { "on": "Affected", "off": "Not affected" }
+        "state": {
+          "on": "Affected",
+          "off": "Not affected"
+        }
+      }
+    }
+  },
+  "triggers": {
+    "home_alert_started": {
+      "name": "Alert for the home location started",
+      "description": "Triggers when an Alertswiss alert begins to cover the Home Assistant home location.",
+      "fields": {
+        "behavior": {
+          "name": "Trigger when"
+        },
+        "for": {
+          "name": "For at least"
+        }
+      }
+    },
+    "home_alert_cleared": {
+      "name": "Alert for the home location cleared",
+      "description": "Triggers when no Alertswiss alert covers the home location any more.",
+      "fields": {
+        "behavior": {
+          "name": "Trigger when"
+        },
+        "for": {
+          "name": "For at least"
+        }
+      }
+    },
+    "alert_count_increased": {
+      "name": "Alert count increased",
+      "description": "Triggers when a count sensor goes up: a new alert was published (all of Switzerland, or the home location, depending on the sensor).",
+      "fields": {
+        "behavior": {
+          "name": "Trigger when"
+        },
+        "for": {
+          "name": "For at least"
+        }
+      }
+    }
+  },
+  "conditions": {
+    "home_is_affected": {
+      "name": "Home location is affected",
+      "description": "Tests if an Alertswiss alert covers the home location.",
+      "fields": {
+        "behavior": {
+          "name": "Condition passes if"
+        },
+        "for": {
+          "name": "For at least"
+        }
+      }
+    },
+    "home_is_not_affected": {
+      "name": "Home location is not affected",
+      "description": "Tests if no Alertswiss alert covers the home location.",
+      "fields": {
+        "behavior": {
+          "name": "Condition passes if"
+        },
+        "for": {
+          "name": "For at least"
+        }
       }
     }
   }

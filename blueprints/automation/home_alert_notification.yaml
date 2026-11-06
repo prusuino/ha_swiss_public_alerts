@@ -1,0 +1,62 @@
+blueprint:
+  name: Swiss Public Alerts – notify on an alert for the home location
+  description: >-
+    Sends a notification to your phone when an Alertswiss alert covers your
+    home location: the title, the publisher, the official description and
+    the behaviour instructions, as published by the authorities.
+
+
+    Add your own steps in the action field, for example a text-to-speech
+    announcement or lights; the text is available there as `{{ message }}`.
+  domain: automation
+  source_url: https://github.com/prusuino/ha_swiss_public_alerts/blob/main/blueprints/automation/home_alert_notification.yaml
+  author: prusuino
+  homeassistant:
+    min_version: 2025.4.0
+  input:
+    home_sensor:
+      name: Home location affected
+      description: The "home location affected" sensor of Swiss Public Alerts.
+      selector:
+        entity:
+          filter:
+            - integration: swiss_public_alerts
+              domain: binary_sensor
+    notify_device:
+      name: Phone
+      description: The phone (Home Assistant Companion app) that receives the notification.
+      selector:
+        device:
+          filter:
+            - integration: mobile_app
+    extra_actions:
+      name: Additional actions
+      description: Run after the notification. The notification text is available as `{{ message }}`.
+      default: []
+      selector:
+        action:
+
+mode: queued
+max_exceeded: silent
+
+triggers:
+  - trigger: state
+    entity_id: !input home_sensor
+    to: "on"
+
+variables:
+  notify_device: !input notify_device
+  title: "{{ trigger.to_state.attributes.title or 'Alert for your location' }}"
+  publisher: "{{ trigger.to_state.attributes.publisher or 'Alertswiss' }}"
+  description: "{{ trigger.to_state.attributes.description or '' }}"
+  instructions: "{{ trigger.to_state.attributes.instructions or [] }}"
+  message: >-
+    {{ publisher }}: {{ description }}
+    {% if instructions %}{{ instructions | join(' ') }}{% endif %}
+
+actions:
+  - action: "notify.mobile_app_{{ device_attr(notify_device, 'name') | slugify }}"
+    data:
+      title: "⚠️ {{ title }}"
+      message: "{{ message }}"
+  - sequence: !input extra_actions
