@@ -190,5 +190,15 @@
         }
       }
     }
+  },
+  "issues": {
+    "unreachable": {
+      "title": "Swiss Public Alerts : service de données injoignable",
+      "description": "Le service à l'adresse {host} n'a pas répondu lors de plusieurs actualisations consécutives. Vérifie ta connexion internet ; si elle fonctionne, le service lui-même est en panne. Les entités restent indisponibles jusque-là et se rétablissent d'elles-mêmes ; cet avis disparaît à la prochaine actualisation réussie."
+    },
+    "plz_unknown": {
+      "title": "Swiss Public Alerts : code postal {plz} inconnu",
+      "description": "Le code postal {plz} ne figure pas dans les données de localisation du portail des dangers naturels, les capteurs de dangers naturels sont donc indisponibles. Vérifie le code postal dans le dialogue « Configurer » de l'entrée ; un NPA suisse à quatre chiffres est attendu. Cet avis disparaît dès que l'entrée se charge avec un code postal connu."
+    }
   }
 }

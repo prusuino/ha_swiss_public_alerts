@@ -13,6 +13,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import Alert, AlertswissApiError, AlertswissClient, FeedData
+from .issues import IssueReporter, async_clear_entry_issues
 from .const import (
     CONF_DATA_SOURCES,
     CONF_LANGUAGE,
@@ -58,6 +59,7 @@ class AlertswissCoordinator(DataUpdateCoordinator[FeedData]):
                 seconds=self._option(entry, CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)
             ),
         )
+        self.issues = IssueReporter(hass, entry.entry_id)
 
     @staticmethod
     def _option(entry: ConfigEntry, key: str, default):
@@ -77,9 +79,12 @@ class AlertswissCoordinator(DataUpdateCoordinator[FeedData]):
 
     async def _async_update_data(self) -> FeedData:
         try:
-            return await self.client.async_fetch()
+            feed = await self.client.async_fetch()
         except AlertswissApiError as err:
+            self.issues.failure("unreachable", {"host": "alertswiss.ch"}, suffix="alertswiss")
             raise UpdateFailed(str(err)) from err
+        self.issues.clear("unreachable", suffix="alertswiss")
+        return feed
 
     # ---- filtered views used by all platforms -------------------------------
 
@@ -143,6 +148,7 @@ class HazardsCoordinator(DataUpdateCoordinator[HazardsData]):
                 )
             ),
         )
+        self.issues = IssueReporter(hass, entry.entry_id)
 
     def apply_options(self) -> None:
         """Apply changed options without reloading the entry."""
@@ -157,9 +163,12 @@ class HazardsCoordinator(DataUpdateCoordinator[HazardsData]):
 
     async def _async_update_data(self) -> HazardsData:
         try:
-            return await self.client.async_fetch()
+            hazards = await self.client.async_fetch()
         except HazardsApiError as err:
+            self.issues.failure("unreachable", {"host": "naturgefahren.ch"}, suffix="hazards")
             raise UpdateFailed(str(err)) from err
+        self.issues.clear("unreachable", suffix="hazards")
+        return hazards
 
 
 class RuntimeData:
@@ -211,6 +220,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 "natural hazard sensors are unavailable",
                 plz,
             )
+            # Does not fix itself: say so under Repairs (withdrawn on unload,
+            # so a corrected postal code in the options clears it).
+            IssueReporter(hass, entry.entry_id).raise_now("plz_unknown", {"plz": str(plz)})
         else:
             hazards = HazardsCoordinator(hass, entry, location)
             await hazards.async_config_entry_first_refresh()
@@ -242,5 +254,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
+        async_clear_entry_issues(hass, entry.entry_id)
         hass.data[DOMAIN].pop(entry.entry_id)
     return unload_ok

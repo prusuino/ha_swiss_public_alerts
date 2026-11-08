@@ -245,6 +245,7 @@ This integration reads the publicly published Alertswiss feed. That content is c
 
 ## Notes
 
+- **Repairs.** When Alertswiss or the natural hazard portal has not answered for three refreshes in a row, or when the configured postal code is unknown to the hazard portal, a notice appears under **Settings → Repairs** that says what happened and what to do; it disappears on its own once the data is back or the postal code is corrected.
 - The feed endpoint is the one the Alertswiss website itself uses, and the danger levels come from the published data of the Natural Hazards Portal website; neither is a formally documented API and both may change without notice. If a source becomes unreachable or changes, its entities — the map markers included — become `unavailable` rather than reporting stale data.
 - The postal-code-to-warning-region mapping is bundled with the integration as a snapshot of the portal's public location list; it is refreshed with integration updates.
 - Alert areas without polygons (rare) cannot be matched against your home; nationwide alerts always match.

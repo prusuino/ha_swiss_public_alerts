@@ -190,5 +190,15 @@
         }
       }
     }
+  },
+  "issues": {
+    "unreachable": {
+      "title": "Swiss Public Alerts: data service unreachable",
+      "description": "The service at {host} has not answered for several refreshes in a row. Check your internet connection; if it is fine, the service itself is down. The entities stay unavailable until then and recover on their own; this notice disappears with the next successful refresh."
+    },
+    "plz_unknown": {
+      "title": "Swiss Public Alerts: postal code {plz} unknown",
+      "description": "The postal code {plz} is not in the location dataset of the natural hazard portal, so the natural hazard sensors are unavailable. Check the postal code in the entry's Configure dialog; a four-digit Swiss postal code is expected. This notice disappears once the entry loads with a known postal code."
+    }
   }
 }

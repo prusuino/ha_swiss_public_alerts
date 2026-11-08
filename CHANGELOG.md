@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.0 — 2026-11-08
+
+- **New: repair notices.** A notice under **Settings → Repairs** when Alertswiss or the natural hazard portal has not answered for three refreshes in a row (it clears itself with the next successful refresh), and when the configured postal code is unknown to the hazard portal, with a pointer to *Configure*. In all four languages.
+
 ## 1.5.1 — 2026-11-06
 
 - **Fixed: the diagnostics download could contain private values.** The entry's unique id went out unredacted: depending on the integration it holds the coordinates of the entry or, for a VKF entry of Swiss Hail Protection, the device serial. The text of the last error could also repeat a request URL. The unique id, the entry title and the entry's name and location fields are now redacted, and only the type of the last error is reported. If you have shared a diagnostics file from the previous version, consider it exposed.
