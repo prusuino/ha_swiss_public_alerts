@@ -78,7 +78,7 @@ def _coordinator_info(coordinator: Any) -> dict[str, Any]:
 
 
 def _coordinators(hass: HomeAssistant, entry: ConfigEntry) -> dict[str, Any]:
-    runtime = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+    runtime = getattr(entry, "runtime_data", None)
     if runtime is None:
         return {}
     return {"alertswiss": getattr(runtime, "alertswiss", None), "hazards": getattr(runtime, "hazards", None)}

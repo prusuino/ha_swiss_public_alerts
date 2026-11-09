@@ -243,6 +243,16 @@ actions:
 
 This integration reads the publicly published Alertswiss feed. That content is copyright of the Swiss federal authorities and licensed under **[CC BY-NC-SA 2.5](https://creativecommons.org/licenses/by-nc-sa/2.5/)** — free-of-charge, non-commercial use with the required source reference **"Quelle: www.alertswiss.ch"**, which every entity of this integration carries as its `attribution` attribute. The optional danger levels are read from the published data of the Natural Hazards Portal of the Confederation; those entities carry the attribution **"Quelle: www.naturgefahren.ch"**. See [NOTICE.md](NOTICE.md) for details, including the provenance of the bundled cantonal coats of arms.
 
+## Removal
+
+1. **Settings → Devices & services → Swiss Public Alerts**, open the entry's menu (⋮) and choose **Delete**. The entities, their history, the map markers and the device go with the entry.
+2. If you registered the bundled cards as dashboard resources, remove them under **Settings → Dashboards → Resources** and delete the dashboard built with them.
+3. Remove the integration itself in the **Marketplace** (or HACS), then restart Home Assistant. With a manual installation, delete `custom_components/swiss_public_alerts` instead.
+
+## Quality scale
+
+The integration declares **Bronze** on the [Home Assistant integration quality scale](https://developers.home-assistant.io/docs/core/integration-quality-scale/): a config flow with tests, unique ids for every entity, brand images, installation and removal instructions, a connection check before an entry is created, no duplicate entries, runtime data on the config entry, and the other Bronze rules. The tier is self-assessed, as it is for every custom integration; the per-rule status, including what is still open for Silver and Gold, is in `custom_components/swiss_public_alerts/quality_scale.yaml`.
+
 ## Notes
 
 - **Repairs.** When Alertswiss or the natural hazard portal has not answered for three refreshes in a row, or when the configured postal code is unknown to the hazard portal, a notice appears under **Settings → Repairs** that says what happened and what to do; it disappears on its own once the data is back or the postal code is corrected.

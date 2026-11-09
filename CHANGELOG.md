@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.0 — 2026-11-09
+
+- **Quality scale Bronze.** The integration keeps its coordinators in the config entry's runtime data, the README gained removal instructions and a quality-scale section, and the manifest declares the **bronze** tier. A test suite (alert parsing, canton detection, point-in-area test, postal code lookup, hazard level aggregation, config flow with source and postal code checks, unreachable feed, single entry and the options flow) runs on every push. No change to entities or configuration.
+
 ## 1.6.0 — 2026-11-08
 
 - **New: repair notices.** A notice under **Settings → Repairs** when Alertswiss or the natural hazard portal has not answered for three refreshes in a row (it clears itself with the next successful refresh), and when the configured postal code is unknown to the hazard portal, with a pointer to *Configure*. In all four languages.

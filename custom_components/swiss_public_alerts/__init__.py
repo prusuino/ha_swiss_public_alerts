@@ -183,12 +183,15 @@ class RuntimeData:
         self.hazards = hazards
 
 
+type SwissPublicAlertsConfigEntry = ConfigEntry[RuntimeData]
+
+
 def enabled_sources(entry: ConfigEntry) -> list[str]:
     """The data sources enabled for this entry (pre-1.1.0 entries: Alertswiss)."""
     return AlertswissCoordinator._option(entry, CONF_DATA_SOURCES, DEFAULT_DATA_SOURCES)
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_setup_entry(hass: HomeAssistant, entry: SwissPublicAlertsConfigEntry) -> bool:
     """Set up Swiss Public Alerts from a config entry."""
     if not hass.data.get(f"{DOMAIN}_static_registered"):
         await hass.http.async_register_static_paths(
@@ -227,7 +230,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             hazards = HazardsCoordinator(hass, entry, location)
             await hazards.async_config_entry_first_refresh()
 
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = RuntimeData(alertswiss, hazards)
+    entry.runtime_data = RuntimeData(alertswiss, hazards)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     async def _options_updated(hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -250,10 +253,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: SwissPublicAlertsConfigEntry) -> bool:
     """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         async_clear_entry_issues(hass, entry.entry_id)
-        hass.data[DOMAIN].pop(entry.entry_id)
     return unload_ok

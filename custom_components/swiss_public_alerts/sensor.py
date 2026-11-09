@@ -18,7 +18,7 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up the sensors."""
-    data: RuntimeData = hass.data[DOMAIN][entry.entry_id]
+    data: RuntimeData = entry.runtime_data
     entities: list[SensorEntity] = []
     if data.alertswiss is not None:
         entities += [

@@ -94,7 +94,7 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up geolocation events and keep them in sync with the feed."""
-    data: RuntimeData = hass.data[DOMAIN][entry.entry_id]
+    data: RuntimeData = entry.runtime_data
     if data.alertswiss is None:
         return
     coordinator = data.alertswiss

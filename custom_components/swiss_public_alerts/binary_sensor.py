@@ -16,7 +16,7 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up the binary sensor."""
-    data: RuntimeData = hass.data[DOMAIN][entry.entry_id]
+    data: RuntimeData = entry.runtime_data
     if data.alertswiss is None:
         return
     async_add_entities([HomeAffectedBinarySensor(data.alertswiss)])
