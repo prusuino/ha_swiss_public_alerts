@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.2 — 2026-11-09
+
+- **Card hardening.** The cards no longer trust attribute values: alert links are only rendered when they are http(s) URLs, the canton coat of arms is only loaded for a known canton code, the distance is coerced to a number and the severity colour lookup matches own keys only. Follow-up to the HACS review of Swiss Lottery by @frenck.
+
 ## 1.7.1 — 2026-11-09
 
 - **Version on the service card.** The integration's version now appears on its service card under Settings → Devices & services, where the entities are listed.
