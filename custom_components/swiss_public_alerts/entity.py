@@ -13,6 +13,7 @@ from .const import (
     HAZARDS_BASE_URL,
     HAZARDS_MANUFACTURER,
     MANUFACTURER,
+    VERSION,
 )
 
 
@@ -27,6 +28,7 @@ class AlertswissEntity(CoordinatorEntity[AlertswissCoordinator]):
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{suffix}"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, coordinator.entry.entry_id)},
+            sw_version=VERSION,
             name="Alertswiss",
             manufacturer=MANUFACTURER,
             entry_type=DeviceEntryType.SERVICE,
@@ -45,6 +47,7 @@ class HazardsEntity(CoordinatorEntity[HazardsCoordinator]):
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{suffix}"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, f"{coordinator.entry.entry_id}_hazards")},
+            sw_version=VERSION,
             name="Naturgefahrenportal",
             manufacturer=HAZARDS_MANUFACTURER,
             entry_type=DeviceEntryType.SERVICE,

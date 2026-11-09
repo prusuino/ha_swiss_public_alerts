@@ -1,6 +1,8 @@
 """Constants for the Swiss Public Alerts integration."""
 
 from __future__ import annotations
+import json
+from pathlib import Path
 
 DOMAIN = "swiss_public_alerts"
 
@@ -124,3 +126,7 @@ CANTON_KEYWORDS = {
     "zug": "zg", "zoug": "zg", "zugo": "zg",
     "zürich": "zh", "zurich": "zh", "zurigo": "zh",
 }
+
+# The integration's own version, shown on the service card. Read from the
+# manifest so that a release never needs to touch two places.
+VERSION: str = json.loads((Path(__file__).parent / "manifest.json").read_text(encoding="utf-8"))["version"]

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.1 — 2026-11-09
+
+- **Version on the service card.** The integration's version now appears on its service card under Settings → Devices & services, where the entities are listed.
+
 ## 1.7.0 — 2026-11-09
 
 - **Quality scale Bronze.** The integration keeps its coordinators in the config entry's runtime data, the README gained removal instructions and a quality-scale section, and the manifest declares the **bronze** tier. A test suite (alert parsing, canton detection, point-in-area test, postal code lookup, hazard level aggregation, config flow with source and postal code checks, unreachable feed, single entry and the options flow) runs on every push. No change to entities or configuration.
