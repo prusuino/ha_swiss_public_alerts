@@ -10,6 +10,16 @@ A Home Assistant custom integration for the official Swiss public alerts from **
 
 Optionally, it also tracks the **natural hazard danger levels** for your location from the **Natural Hazards Portal of the Confederation** ([naturgefahren.ch](https://www.naturgefahren.ch/)) — the joint hazard assessment of MeteoSwiss, FOEN, SLF, and the Swiss Seismological Service.
 
+## Highlights
+
+- **Knows whether your home is affected**: your home location is tested against the official area polygon of every alert — not a radius guess.
+- **The full official text**: alert text and behaviour instructions on the sensor; test alerts and all-clear messages are filtered out.
+- **Alerts on the map and in numbers**: one marker per alert with a severity symbol, the number of alerts nationwide and for your home.
+- **Natural hazard danger levels**: optionally the levels from naturgefahren.ch for twelve processes — from wind, thunderstorm and heat wave to flood, avalanches and forest fire — with a sensor for the highest one.
+- **Three dashboard cards**: ticker, alert and list, filtered by canton, distance or severity, all with a visual editor — plus a dashboard strategy.
+- **Built for the automation editor**: triggers (alert for the home location started, cleared, alert count increased), conditions (home location is / is not affected) and a notification blueprint — no templates needed.
+- **Set up in a minute**: pick the sources, the language and the minimum severity; German, English, French and Italian; diagnostics download with your coordinates redacted.
+
 ## Background
 
 Alertswiss publishes every alert with the **exact polygon of the affected area**. This integration uses that to answer the one question that matters: **is my home affected?** Instead of a simple radius check, your Home Assistant home location is tested against the official area polygons (point-in-polygon), so a "whole canton of X" alert matches if — and only if — you live there.
