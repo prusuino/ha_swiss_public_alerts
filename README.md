@@ -4,6 +4,11 @@
 
 [![marketplace_badge](https://img.shields.io/badge/Marketplace-Default-41BDF5.svg)](https://hacs.xyz/docs/marketplace/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/prusuino/ha_swiss_public_alerts)](https://github.com/prusuino/ha_swiss_public_alerts/releases)
+[![Validate](https://github.com/prusuino/ha_swiss_public_alerts/actions/workflows/validate.yml/badge.svg)](https://github.com/prusuino/ha_swiss_public_alerts/actions/workflows/validate.yml)
+[![Tests](https://github.com/prusuino/ha_swiss_public_alerts/actions/workflows/tests.yml/badge.svg)](https://github.com/prusuino/ha_swiss_public_alerts/actions/workflows/tests.yml)
+[![Home Assistant](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fprusuino%2Fha_swiss_public_alerts%2Fmain%2Fhacs.json&query=%24.homeassistant&label=Home%20Assistant&suffix=%2B&color=41BDF5)](https://www.home-assistant.io/)
+[![Quality scale](https://img.shields.io/badge/Quality%20Scale-Bronze-cd7f32.svg)](https://developers.home-assistant.io/docs/core/integration-quality-scale/)
 <a href="https://www.buymeacoffee.com/prusuino"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="20"></a>
 
 A Home Assistant custom integration for the official Swiss public alerts from **Alertswiss**, the alerting platform of the **Federal Office for Civil Protection (FOCP/BABS)** and the cantons: fire bans, natural hazards, drinking-water contamination, evacuation orders, siren tests, and other official alerts.
