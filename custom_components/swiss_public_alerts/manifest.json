@@ -1,6 +1,7 @@
 {
   "domain": "swiss_public_alerts",
   "name": "Swiss Public Alerts",
+  "categories": ["weather_alerts.public_warnings"],
   "codeowners": ["@prusuino"],
   "config_flow": true,
   "dependencies": ["http"],
@@ -10,5 +11,5 @@
   "issue_tracker": "https://github.com/prusuino/ha_swiss_public_alerts/issues",
   "quality_scale": "bronze",
   "requirements": [],
-  "version": "1.7.2"
+  "version": "1.7.3"
 }

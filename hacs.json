@@ -1,5 +1,6 @@
 {
   "name": "Swiss Public Alerts (Alertswiss)",
+  "country": "CH",
   "zip_release": true,
   "filename": "swiss_public_alerts.zip",
   "render_readme": true,
