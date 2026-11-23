@@ -73,14 +73,24 @@ class HazardState:
     description: str
     web_link_text: str
     expires: int | None
+    onset: int | None = None
 
-    @property
-    def expires_iso(self) -> str | None:
-        if self.expires is None:
+    @staticmethod
+    def _iso(value: int | None) -> str | None:
+        if value is None:
             return None
         from datetime import datetime, timezone
 
-        return datetime.fromtimestamp(self.expires, tz=timezone.utc).isoformat()
+        return datetime.fromtimestamp(value, tz=timezone.utc).isoformat()
+
+    @property
+    def expires_iso(self) -> str | None:
+        return self._iso(self.expires)
+
+    @property
+    def onset_iso(self) -> str | None:
+        """When the warning begins; it can lie ahead of now."""
+        return self._iso(self.onset)
 
 
 @dataclass(frozen=True)
@@ -197,6 +207,7 @@ class HazardsClient:
                 description=(best or {}).get("description") or "",
                 web_link_text=(best or {}).get("webLinkText") or "",
                 expires=(best or {}).get("expires"),
+                onset=onset if isinstance(onset := (best or {}).get("onset"), (int, float)) else None,
             )
 
         config = raw.get("config") or {}

@@ -77,6 +77,33 @@ def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return 2 * EARTH_RADIUS_KM * math.asin(math.sqrt(a))
 
 
+def _ring(pairs) -> tuple[tuple[float, float], ...]:
+    """The (lat, lon) vertices of a coordinate list; unreadable pairs are skipped."""
+    coords = []
+    for pair in pairs or []:
+        try:
+            coords.append((float(pair[0]), float(pair[1])))
+        except (TypeError, ValueError, IndexError):
+            continue
+    return tuple(coords)
+
+
+def _web_link(value: str | None) -> str | None:
+    """A link as the feed gives it, made usable.
+
+    Authorities often enter a bare host ("www.example.ch"); that gets https.
+    Anything that is not a web address (mailto:, javascript:, text) is dropped.
+    """
+    link = (value or "").strip()
+    if not link or any(c.isspace() for c in link):
+        return None
+    if re.match(r"^https?://", link, re.I):
+        return link
+    if re.match(r"^www\.[\w.-]+\.[a-z]{2,}(/.*)?$", link, re.I):
+        return "https://" + link
+    return None
+
+
 def _point_in_polygon(lat: float, lon: float, polygon: tuple[tuple[float, float], ...]) -> bool:
     """Ray-casting point-in-polygon test on (lat, lon) vertex tuples."""
     inside = False
@@ -112,12 +139,30 @@ class Alert:
     polygons: tuple[tuple[tuple[float, float], ...], ...] = field(repr=False)
     centroid: tuple[float, float] | None
     canton_code: str | None
+    # Zones cut out of a polygon, one tuple of rings per entry of `polygons`.
+    holes: tuple[tuple[tuple[tuple[float, float], ...], ...], ...] = field(default=(), repr=False)
+    # Areas given as a circle: (lat, lon, radius in km).
+    circles: tuple[tuple[float, float, float], ...] = field(default=(), repr=False)
+    cantons: tuple[str, ...] = ()
+    links: tuple[tuple[str, str], ...] = ()
+    contact: str = ""
+    machine_translated: bool = False
 
     def covers(self, lat: float, lon: float) -> bool:
-        """Whether the given location lies inside any affected area."""
+        """Whether the given location lies inside any affected area.
+
+        An area is a polygon, minus the zones the authority cut out of it,
+        or a circle around a point.
+        """
         if self.nation_wide:
             return True
-        return any(_point_in_polygon(lat, lon, poly) for poly in self.polygons)
+        for index, poly in enumerate(self.polygons):
+            if not _point_in_polygon(lat, lon, poly):
+                continue
+            holes = self.holes[index] if index < len(self.holes) else ()
+            if not any(_point_in_polygon(lat, lon, hole) for hole in holes):
+                return True
+        return any(haversine_km(lat, lon, c_lat, c_lon) <= radius for c_lat, c_lon, radius in self.circles)
 
     def distance_km(self, lat: float, lon: float) -> float | None:
         """Distance from the given location to the alert area centroid."""
@@ -138,7 +183,10 @@ class Alert:
             "areas": list(self.area_descriptions),
             "nation_wide": self.nation_wide,
             "canton_code": self.canton_code,
+            "cantons": list(self.cantons),
             "link": self.link,
+            "links": [{"href": href, "text": text} for href, text in self.links],
+            "machine_translated": self.machine_translated,
         }
 
 
@@ -193,23 +241,40 @@ class AlertswissClient:
             return None
 
         polygons: list[tuple[tuple[float, float], ...]] = []
+        holes: list[tuple[tuple[tuple[float, float], ...], ...]] = []
+        circles: list[tuple[float, float, float]] = []
+        cantons: list[str] = []
         area_descriptions: list[str] = []
         for area in item.get("areas") or []:
+            if not isinstance(area, dict):
+                continue
             desc = _clean_text((area.get("description") or {}).get("description"))
             if desc:
                 area_descriptions.append(desc)
             for poly in area.get("polygons") or []:
-                coords = []
-                for pair in poly.get("coordinates") or []:
-                    try:
-                        coords.append((float(pair[0]), float(pair[1])))
-                    except (TypeError, ValueError, IndexError):
-                        continue
-                if len(coords) >= 3:
-                    polygons.append(tuple(coords))
+                coords = _ring(poly.get("coordinates"))
+                if len(coords) < 3:
+                    continue
+                polygons.append(coords)
+                holes.append(tuple(
+                    ring
+                    for exclude in poly.get("excludes") or []
+                    if len(ring := _ring((exclude or {}).get("coordinates"))) >= 3
+                ))
+            for circle in area.get("circles") or []:
+                try:
+                    center = circle["centerPosition"]
+                    radius = float(circle["radius"])  # kilometres, as in CAP
+                    circles.append((float(center[0]), float(center[1]), radius))
+                except (KeyError, TypeError, ValueError, IndexError):
+                    continue
+            for region in area.get("regions") or []:
+                code = str((region or {}).get("region") or "").strip().lower()
+                if re.fullmatch(r"[a-z]{2}", code) and code not in cantons:
+                    cantons.append(code)
 
         centroid = None
-        vertices = [pt for poly in polygons for pt in poly]
+        vertices = [pt for poly in polygons for pt in poly] + [(c[0], c[1]) for c in circles]
         if vertices:
             centroid = (
                 sum(p[0] for p in vertices) / len(vertices),
@@ -223,6 +288,19 @@ class AlertswissClient:
         )
 
         publisher = _clean_text(item.get("publisherName"))
+        links = tuple(
+            (href, _clean_text(entry.get("text")) or href)
+            for entry in item.get("links") or []
+            if isinstance(entry, dict) and (href := _web_link(entry.get("href")))
+        )
+        # The canton as the feed names it for the area; the publisher's name
+        # is the fallback for alerts without a region.
+        if item.get("nationWide"):
+            canton_code = "ch"
+        elif len(cantons) == 1:
+            canton_code = cantons[0]
+        else:
+            canton_code = detect_canton(publisher) or (cantons[0] if cantons else None)
         return Alert(
             identifier=identifier,
             title=_clean_text((item.get("title") or {}).get("title")) or identifier,
@@ -231,7 +309,8 @@ class AlertswissClient:
             severity=item.get("severity") or SEVERITY_UNKNOWN,
             publisher=publisher,
             published=_parse_published(item.get("reference")),
-            link=item.get("link")
+            link=_web_link(item.get("link"))
+            or (links[0][0] if links else None)
             or ALERT_URL_TEMPLATE.format(language=self.language, identifier=identifier),
             instructions=instructions,
             area_descriptions=tuple(area_descriptions),
@@ -239,5 +318,11 @@ class AlertswissClient:
             all_clear=bool(item.get("allClear")),
             polygons=tuple(polygons),
             centroid=centroid,
-            canton_code="ch" if item.get("nationWide") else detect_canton(publisher),
+            canton_code=canton_code,
+            holes=tuple(holes),
+            circles=tuple(circles),
+            cantons=tuple(cantons),
+            links=links,
+            contact=_clean_text((item.get("contact") or {}).get("contact")),
+            machine_translated=bool(item.get("gtransOrigin")),
         )

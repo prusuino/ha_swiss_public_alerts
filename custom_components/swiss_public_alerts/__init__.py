@@ -124,6 +124,7 @@ class AlertswissCoordinator(DataUpdateCoordinator[FeedData]):
             if full:
                 summary["description"] = alert.description
                 summary["instructions"] = list(alert.instructions)
+                summary["contact"] = alert.contact
             result.append(summary)
         return result
 

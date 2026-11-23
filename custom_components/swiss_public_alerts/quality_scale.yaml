@@ -43,11 +43,13 @@ rules:
   entity-unavailable: done
   integration-owner: done
   log-when-unavailable: done
-  parallel-updates: todo
+  parallel-updates: done
   reauthentication-flow:
     status: exempt
     comment: The open feeds need no credentials.
-  test-coverage: todo
+  test-coverage:
+    status: done
+    comment: Above 95 % of statements and branches; the test workflow fails below that.
 
   # Gold
   devices: done

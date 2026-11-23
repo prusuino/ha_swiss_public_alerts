@@ -29,6 +29,9 @@ from .const import ATTRIBUTION, DOMAIN, STATIC_URL_BASE
 
 _LOGGER = logging.getLogger(__name__)
 
+# The coordinator fetches the data; entities never call the feeds themselves.
+PARALLEL_UPDATES = 0
+
 
 def marker_unique_id(entry_id: str, identifier: str) -> str:
     """Unique id of the marker for one alert.

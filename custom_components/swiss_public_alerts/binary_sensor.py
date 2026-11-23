@@ -11,6 +11,9 @@ from . import AlertswissCoordinator, RuntimeData
 from .const import DOMAIN, SEVERITY_RANK
 from .entity import AlertswissEntity
 
+# The coordinator fetches the data; entities never call the feeds themselves.
+PARALLEL_UPDATES = 0
+
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
@@ -59,5 +62,6 @@ class HomeAffectedBinarySensor(AlertswissEntity, BinarySensorEntity):
             **top.summary,
             "description": top.description,
             "instructions": list(top.instructions),
+            "contact": top.contact,
             "alerts": self.coordinator.summaries(alerts, full=True),
         }

@@ -35,6 +35,8 @@ const ALERTSWISS_L10N = {
     published: 'Publiziert am',
     nationwide: 'landesweit',
     more_alerts: 'weitere Meldung(en)',
+    contact: 'Kontakt',
+    translated: 'Automatisch übersetzt',
     severity: { minor: 'Information', moderate: 'Warnung', severe: 'Alarm', unknown: 'Unbekannt' },
   },
   en: {
@@ -45,6 +47,8 @@ const ALERTSWISS_L10N = {
     published: 'Published',
     nationwide: 'nationwide',
     more_alerts: 'more alert(s)',
+    contact: 'Contact',
+    translated: 'Machine translated',
     severity: { minor: 'Information', moderate: 'Warning', severe: 'Alarm', unknown: 'Unknown' },
   },
   fr: {
@@ -55,6 +59,8 @@ const ALERTSWISS_L10N = {
     published: 'Publié le',
     nationwide: 'national',
     more_alerts: 'autre(s) alerte(s)',
+    contact: 'Contact',
+    translated: 'Traduction automatique',
     severity: { minor: 'Information', moderate: 'Avertissement', severe: 'Alarme', unknown: 'Inconnu' },
   },
   it: {
@@ -65,6 +71,8 @@ const ALERTSWISS_L10N = {
     published: 'Pubblicato il',
     nationwide: 'nazionale',
     more_alerts: 'altra/e allerta/e',
+    contact: 'Contatto',
+    translated: 'Traduzione automatica',
     severity: { minor: 'Informazione', moderate: 'Avviso', severe: 'Allarme', unknown: 'Sconosciuto' },
   },
 };
@@ -389,9 +397,22 @@ class AlertswissAlertCard extends HTMLElement {
       html += `<div class="inst-title">${L.instructions}:</div><ul>`
         + a.instructions.map((i) => `<li>${awEsc(i)}</li>`).join('') + '</ul>';
     }
+    if (a.contact) {
+      html += `<div class="time">☎ ${L.contact}: ${awEsc(a.contact)}</div>`;
+    }
+    if (a.machine_translated) {
+      html += `<div class="time">🌐 ${L.translated}</div>`;
+    }
     const href = awHref(a.link);
     if (href) {
       html += `<a href="${href}" target="_blank" rel="noreferrer">🔗 ${L.official}</a>`;
+    }
+    // Further links the authority attached, each with its own text.
+    for (const extra of Array.isArray(a.links) ? a.links : []) {
+      const extraHref = awHref(extra && extra.href);
+      if (extraHref && extraHref !== href) {
+        html += `<div><a href="${extraHref}" target="_blank" rel="noreferrer">🔗 ${awEsc(extra.text || extra.href)}</a></div>`;
+      }
     }
     this._body.innerHTML = html;
 

@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.8.0 — 2026-11-23
+
+Checked against the live Alertswiss feed of 23 November 2026 (eight alerts, all four languages).
+
+- **Fixed: alerts whose area is a circle were missed.** Alertswiss describes an area as a polygon or as a circle around a point (a closed road, a single building). Circles were ignored: such an alert never counted for the home location, had no map marker and no distance. A home inside the circle is now reported as affected, and the alert gets its marker at the circle's centre.
+- **Fixed: zones cut out of an area counted as affected.** An area can exclude zones inside it; a home in such a zone is no longer reported as affected.
+- **Fixed: links without "https://" were lost.** Authorities often enter a bare address such as `www.example.ch`; the cards showed no link then. Such addresses now get `https://`. The further links an authority attaches are available as the attribute `links` (address and text) and shown on the alert card.
+- **Changed: the canton comes from the feed.** The canton of an alert (`canton_code`, used for the coat of arms and the canton filter of the cards) is read from the area's region code instead of being guessed from the publisher's name, which stays the fallback. The new attribute `cantons` lists all of them when an alert spans several.
+- **New: contact and machine translation.** The home-affected sensor carries the authority's `contact` text; `machine_translated` tells when Alertswiss translated an alert automatically. The alert card shows both.
+- **New: `onset` on the natural-hazard sensors**, the time a warning begins, next to `expires`.
+- **Quality scale Silver.** Parallel updates are declared and the test suite grew from 12 to 54 tests covering 98 % of the code; the test workflow fails below 95 %. The card file changed: reload the dashboard with Ctrl+F5 / Cmd+Shift+R if the alert card does not show the new lines.
+
 ## 1.7.3 — 2026-11-19
 
 - The Home Assistant Marketplace lists the integration under *Weather & alerts → Public warnings*. The repository is marked as made for Switzerland. Nothing changes in how the integration works.

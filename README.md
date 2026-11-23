@@ -8,7 +8,7 @@
 [![Validate](https://github.com/prusuino/ha_swiss_public_alerts/actions/workflows/validate.yml/badge.svg)](https://github.com/prusuino/ha_swiss_public_alerts/actions/workflows/validate.yml)
 [![Tests](https://github.com/prusuino/ha_swiss_public_alerts/actions/workflows/tests.yml/badge.svg)](https://github.com/prusuino/ha_swiss_public_alerts/actions/workflows/tests.yml)
 [![Home Assistant](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fprusuino%2Fha_swiss_public_alerts%2Fmain%2Fhacs.json&query=%24.homeassistant&label=Home%20Assistant&suffix=%2B&color=41BDF5)](https://www.home-assistant.io/)
-[![Quality scale](https://img.shields.io/badge/Quality%20Scale-Bronze-cd7f32.svg)](https://developers.home-assistant.io/docs/core/integration-quality-scale/)
+[![Quality scale](https://img.shields.io/badge/Quality%20Scale-Silver-c0c0c0.svg)](https://developers.home-assistant.io/docs/core/integration-quality-scale/)
 <a href="https://www.buymeacoffee.com/prusuino"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="20"></a>
 
 A Home Assistant custom integration for the official Swiss public alerts from **Alertswiss**, the alerting platform of the **Federal Office for Civil Protection (FOCP/BABS)** and the cantons: fire bans, natural hazards, drinking-water contamination, evacuation orders, siren tests, and other official alerts.
@@ -17,7 +17,7 @@ Optionally, it also tracks the **natural hazard danger levels** for your locatio
 
 ## Highlights
 
-- **Knows whether your home is affected**: your home location is tested against the official area polygon of every alert — not a radius guess.
+- **Knows whether your home is affected**: your home location is tested against the official area of every alert — its polygon minus the zones the authority cut out, or its circle — not a radius guess.
 - **The full official text**: alert text and behaviour instructions on the sensor; test alerts and all-clear messages are filtered out.
 - **Alerts on the map and in numbers**: one marker per alert with a severity symbol, the number of alerts nationwide and for your home.
 - **Natural hazard danger levels**: optionally the levels from naturgefahren.ch for twelve processes — from wind, thunderstorm and heat wave to flood, avalanches and forest fire — with a sensor for the highest one.
@@ -27,13 +27,13 @@ Optionally, it also tracks the **natural hazard danger levels** for your locatio
 
 ## Background
 
-Alertswiss publishes every alert with the **exact polygon of the affected area**. This integration uses that to answer the one question that matters: **is my home affected?** Instead of a simple radius check, your Home Assistant home location is tested against the official area polygons (point-in-polygon), so a "whole canton of X" alert matches if — and only if — you live there.
+Alertswiss publishes every alert with the **exact polygon of the affected area**. This integration uses that to answer the one question that matters: **is my home affected?** Instead of a simple radius check, your Home Assistant home location is tested against the official area polygons (point-in-polygon), so a "whole canton of X" alert matches if — and only if — you live there. Zones an authority cuts out of an area do not match, and an area given as a circle around a point (a closed road, a single building) is matched by its radius.
 
 ## What it provides
 
 | Entity | Description |
 |---|---|
-| `binary_sensor` **Home location affected** | `on` when at least one active alert area covers your home. Attributes carry the full alert: title, description, official **behaviour instructions**, publisher, severity, published time, link — everything an automation needs to send a useful notification. All matching alerts are included in an `alerts` attribute |
+| `binary_sensor` **Home location affected** | `on` when at least one active alert area covers your home. Attributes carry the full alert: title, description, official **behaviour instructions**, the authority's `contact` text, publisher, severity, published time, `link` and the further `links` the authority attached (address and text), `canton_code` and `cantons`, and `machine_translated` when Alertswiss translated the alert automatically — everything an automation needs to send a useful notification. All matching alerts are included in an `alerts` attribute |
 | `sensor` **Active alerts Switzerland** | Number of active alerts nationwide, with per-alert summaries (canton code, severity, published time, distance from home) as attributes |
 | `sensor` **Alerts for home location** | Number of active alerts covering your home |
 | `sensor` **Feed heartbeat age** | Diagnostic: age of the Alertswiss feed heartbeat |
@@ -47,7 +47,7 @@ When the **"Natural hazard danger levels"** data source is enabled, the integrat
 
 | Entity | Description |
 |---|---|
-| `sensor` **danger level** per hazard process | One sensor each for **wind, thunderstorm, rain, snow, slippery roads, heat wave, frost, forest fire, flood, avalanches, drought, and earthquake**. The state is the official danger level **1–5** (0 = no warning); attributes carry the official description text, the outlook (pre-warning) level, and the expiry time |
+| `sensor` **danger level** per hazard process | One sensor each for **wind, thunderstorm, rain, snow, slippery roads, heat wave, frost, forest fire, flood, avalanches, drought, and earthquake**. The state is the official danger level **1–5** (0 = no warning); attributes carry the official description text, the outlook (pre-warning) level, and the times the warning begins (`onset`) and ends (`expires`) |
 | `sensor` **Highest danger level** | The maximum across all twelve processes — a single convenient trigger for notifications, with all per-process levels as attributes |
 
 The two sources complement each other: Alertswiss carries the **official alerts and cantonal orders** (e.g. a fire ban), the portal carries the underlying **danger levels for every process at every level** — including the moderate levels that never reach Alertswiss. The same five-level federal danger scale is used by both.
@@ -266,14 +266,14 @@ This integration reads the publicly published Alertswiss feed. That content is c
 
 ## Quality scale
 
-The integration declares **Bronze** on the [Home Assistant integration quality scale](https://developers.home-assistant.io/docs/core/integration-quality-scale/): a config flow with tests, unique ids for every entity, brand images, installation and removal instructions, a connection check before an entry is created, no duplicate entries, runtime data on the config entry, and the other Bronze rules. The tier is self-assessed, as it is for every custom integration; the per-rule status, including what is still open for Silver and Gold, is in `custom_components/swiss_public_alerts/quality_scale.yaml`.
+The integration declares **Silver** on the [Home Assistant integration quality scale](https://developers.home-assistant.io/docs/core/integration-quality-scale/). Bronze: a config flow with tests, unique ids for every entity, brand images, installation and removal instructions, a connection check before an entry is created, no duplicate entries, runtime data on the config entry. Silver on top of it: the entities and the map markers turn unavailable when a feed cannot be read and that is logged once, the entry unloads cleanly, every setup and Configure parameter is documented, parallel updates are declared, and the tests cover more than 95 % of the code (the test workflow fails below that). The tier is self-assessed, as it is for every custom integration; the per-rule status, including what is still open for Silver and Gold, is in `custom_components/swiss_public_alerts/quality_scale.yaml`.
 
 ## Notes
 
 - **Repairs.** When Alertswiss or the natural hazard portal has not answered for three refreshes in a row, or when the configured postal code is unknown to the hazard portal, a notice appears under **Settings → Repairs** that says what happened and what to do; it disappears on its own once the data is back or the postal code is corrected.
 - The feed endpoint is the one the Alertswiss website itself uses, and the danger levels come from the published data of the Natural Hazards Portal website; neither is a formally documented API and both may change without notice. If a source becomes unreachable or changes, its entities — the map markers included — become `unavailable` rather than reporting stale data.
 - The postal-code-to-warning-region mapping is bundled with the integration as a snapshot of the portal's public location list; it is refreshed with integration updates.
-- Alert areas without polygons (rare) cannot be matched against your home; nationwide alerts always match.
+- An alert without any area (no polygon and no circle) cannot be matched against your home and gets no map marker; nationwide alerts always match. The canton of an alert is the one the feed names for its area; the publisher's name is only the fallback.
 - This integration is unofficial and not affiliated with, endorsed by, or supported by the FOCP/BABS or Alertswiss.
 - **This is informational only.** For official alerting, use the [Alertswiss app](https://www.alert.swiss/) with its push notifications — it is the authoritative channel, works when your smart home does not, and covers you when you are away from home.
 - **Download diagnostics** (entry menu under **Settings → Devices & services**) gives the entry's configuration, what the integration last fetched and the current state of its entities, with coordinates, credentials and the entry's title and unique id redacted. Entity ids and names stay readable and can contain a place or stop name, so look through the file before attaching it to a public issue.

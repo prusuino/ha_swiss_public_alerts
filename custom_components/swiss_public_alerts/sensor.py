@@ -13,6 +13,9 @@ from .api import _clean_text
 from .const import DOMAIN, HAZARD_ICONS, HAZARD_TYPES, MAX_LISTED_ALERTS
 from .entity import AlertswissEntity, HazardsEntity
 
+# The coordinator fetches the data; entities never call the feeds themselves.
+PARALLEL_UPDATES = 0
+
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
@@ -122,6 +125,7 @@ class HazardLevelSensor(HazardsEntity, SensorEntity):
             "location": self.coordinator.client.location.name,
             "description": _clean_text(state.description),
             "outlook_level": state.outlook_level,
+            "onset": state.onset_iso,
             "expires": state.expires_iso,
         }
 
