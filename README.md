@@ -83,7 +83,7 @@ The map markers are different again: a marker is named after the alert's title, 
 
 ## Bundled cards & dashboard
 
-![The Alerts dashboard](assets/screenshot_dashboard.png)
+![The bundled cards on a dashboard: ticker, alert details with the machine translation note and the links of the authority, a map and the list of all alerts](assets/screenshot_dashboard.png)
 
 The integration ships three Lovelace cards, all with a **visual editor** and available in the normal card picker:
 
