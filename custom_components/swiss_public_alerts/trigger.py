@@ -67,7 +67,14 @@ else:
             self._previous_state: dict[str, str | None] = {}
 
         def entity_filter(self, entities: set[str]) -> set[str]:
-            return _own_entities(self._hass, super().entity_filter(entities))
+            # Start from what the entities show now, so that an outage right
+            # after the automation starts is judged against a known state.
+            kept = _own_entities(self._hass, super().entity_filter(entities))
+            for entity_id in kept:
+                state = self._hass.states.get(entity_id)
+                if entity_id not in self._last_state and state is not None and state.state not in _GAP:
+                    self._last_state[entity_id] = state.state
+            return kept
 
         def is_valid_state(self, state: State, report_not_triggered) -> bool:
             self._previous_state[state.entity_id] = self._last_state.get(state.entity_id)
