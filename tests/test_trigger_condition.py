@@ -92,7 +92,75 @@ async def test_alert_count_increased(hass: HomeAssistant, feeds: Feeds) -> None:
     await refresh(hass, entry)
     feeds.alertswiss = feed(item("POA-A"), circle_item(), item("POA-C"))
     await refresh(hass, entry)
-    assert len(calls) == 1  # back from unavailable is not an increase
+    assert len(calls) == 2  # two more alerts than before the outage
+
+    feeds.alertswiss = AlertswissApiError("down")
+    await refresh(hass, entry)
+    feeds.alertswiss = feed(item("POA-A"), circle_item(), item("POA-C"))
+    await refresh(hass, entry)
+    assert len(calls) == 2  # the same count as before the outage: quiet
+
+
+async def test_an_alert_published_during_an_outage_still_starts(hass: HomeAssistant, feeds: Feeds) -> None:
+    from custom_components.swiss_public_alerts.api import AlertswissApiError
+
+    entry = await setup(hass, feeds)
+    home = entity_id(hass, entry, "home_affected", "binary_sensor")
+    started = await _automation(hass, trigger={"trigger": "swiss_public_alerts.home_alert_started", "target": {"entity_id": home}})
+
+    # known to be off, then the feed fails, and comes back with an alert for the home
+    feeds.alertswiss = feed(circle_item())
+    await refresh(hass, entry)
+    feeds.alertswiss = AlertswissApiError("down")
+    await refresh(hass, entry)
+    assert hass.states.get(home).state == "unavailable"
+    feeds.alertswiss = feed(item("POA-HOME"))
+    await refresh(hass, entry)
+    assert len(started) == 1
+
+    # another outage while the alert stays: no second notification
+    feeds.alertswiss = AlertswissApiError("down")
+    await refresh(hass, entry)
+    feeds.alertswiss = feed(item("POA-HOME"))
+    await refresh(hass, entry)
+    assert len(started) == 1
+
+
+async def test_nothing_known_before_the_gap_fires_started_but_not_cleared(hass: HomeAssistant, feeds: Feeds) -> None:
+    from custom_components.swiss_public_alerts.api import AlertswissApiError
+
+    feeds.alertswiss = feed(item("POA-HOME"))
+    entry = await setup(hass, feeds)
+    home = entity_id(hass, entry, "home_affected", "binary_sensor")
+    feeds.alertswiss = AlertswissApiError("down")
+    await refresh(hass, entry)
+    # the automations start while the entity is unavailable
+    calls = await _automation(hass, trigger=[
+        {"trigger": "swiss_public_alerts.home_alert_started", "target": {"entity_id": home}, "id": "started"},
+        {"trigger": "swiss_public_alerts.home_alert_cleared", "target": {"entity_id": home}, "id": "cleared"},
+    ])
+    feeds.alertswiss = feed(item("POA-HOME"))
+    await refresh(hass, entry)
+    assert len(calls) == 1  # started: rather one notification too many than one too few
+
+    feeds.alertswiss = AlertswissApiError("down")
+    await refresh(hass, entry)
+    feeds.alertswiss = feed()
+    await refresh(hass, entry)
+    assert len(calls) == 2  # cleared: it was on before the gap
+
+
+async def test_cleared_stays_quiet_when_nothing_is_known_from_before(hass: HomeAssistant, feeds: Feeds) -> None:
+    from custom_components.swiss_public_alerts.api import AlertswissApiError
+
+    entry = await setup(hass, feeds)
+    home = entity_id(hass, entry, "home_affected", "binary_sensor")
+    feeds.alertswiss = AlertswissApiError("down")
+    await refresh(hass, entry)
+    cleared = await _automation(hass, trigger={"trigger": "swiss_public_alerts.home_alert_cleared", "target": {"entity_id": home}})
+    feeds.alertswiss = feed()
+    await refresh(hass, entry)
+    assert len(cleared) == 0
 
 
 async def test_conditions(hass: HomeAssistant, feeds: Feeds) -> None:

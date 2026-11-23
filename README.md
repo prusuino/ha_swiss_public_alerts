@@ -230,9 +230,9 @@ On Home Assistant 2026.10 or newer the integration adds its own entries to the a
 
 | Trigger | Fires when |
 |---|---|
-| **Alert for the home location started** | the "home location affected" sensor switches on |
-| **Alert for the home location cleared** | it switches off |
-| **Alert count increased** | a count sensor goes up – a new alert was published, for all of Switzerland or for the home location, depending on the sensor you target |
+| **Alert for the home location started** | the "home location affected" sensor switches on — also when the alert was published while the feed could not be reached; an alert that was already on before such an outage does not fire again |
+| **Alert for the home location cleared** | it switches off — after an outage only when it was on before |
+| **Alert count increased** | a count sensor goes up – a new alert was published, for all of Switzerland or for the home location, depending on the sensor you target; after an outage the count is compared with the one before it |
 
 On 2026.11 or newer there are also two conditions, **Home location is affected** and **Home location is not affected**. Each entry targets the integration's own entities; the usual *for* duration and behaviour options apply.
 

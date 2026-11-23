@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from homeassistant.components.binary_sensor import DOMAIN as BINARY_SENSOR_DOMAIN
 from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
-from homeassistant.const import STATE_OFF, STATE_ON
+from homeassistant.const import STATE_OFF, STATE_ON, STATE_UNAVAILABLE, STATE_UNKNOWN
 from homeassistant.core import HomeAssistant, State
 from homeassistant.helpers import entity_registry as er
 
@@ -44,31 +44,80 @@ else:
         except (TypeError, ValueError):
             return None
 
-    class _HomeAlertStarted(make_entity_target_state_trigger(HOME_DOMAIN_SPECS, STATE_ON)):
-        """The home-affected entity switches to on."""
+    _GAP = (STATE_UNAVAILABLE, STATE_UNKNOWN)
 
-        def entity_filter(self, entities: set[str]) -> set[str]:
-            return _own_entities(self._hass, super().entity_filter(entities))
+    class _AcrossGaps:
+        """Lets a trigger see a change that follows a gap without a value.
 
-    class _HomeAlertCleared(make_entity_target_state_trigger(HOME_DOMAIN_SPECS, STATE_OFF)):
-        """The home-affected entity switches to off."""
+        The core skips every change out of "unavailable" or "unknown". While
+        the feed cannot be reached the entities are unavailable, so an alert
+        published during the outage would switch the home-affected entity
+        from unavailable to on, and the core would not fire. Such a change
+        is let through here and judged against the last state seen before
+        the gap. The core asks is_valid_state for every state with a value
+        and only then is_valid_transition, so the states are remembered
+        there.
+        """
 
-        def entity_filter(self, entities: set[str]) -> set[str]:
-            return _own_entities(self._hass, super().entity_filter(entities))
+        _excluded_from_states = frozenset()
 
-    class _AlertCountIncreased(EntityTriggerBase):
-        """A count sensor goes up: at least one new alert was published."""
-
-        _domain_specs = COUNT_DOMAIN_SPECS
+        def __init__(self, hass: HomeAssistant, config) -> None:
+            super().__init__(hass, config)
+            self._last_state: dict[str, str] = {}
+            self._previous_state: dict[str, str | None] = {}
 
         def entity_filter(self, entities: set[str]) -> set[str]:
             return _own_entities(self._hass, super().entity_filter(entities))
 
         def is_valid_state(self, state: State, report_not_triggered) -> bool:
+            self._previous_state[state.entity_id] = self._last_state.get(state.entity_id)
+            self._last_state[state.entity_id] = state.state
+            return super().is_valid_state(state, report_not_triggered)
+
+        def _before_gap(self, to_state: State) -> str | None:
+            return self._previous_state.get(to_state.entity_id)
+
+    class _HomeAlertStarted(_AcrossGaps, make_entity_target_state_trigger(HOME_DOMAIN_SPECS, STATE_ON)):
+        """The home-affected entity switches to on.
+
+        After a gap it fires unless the entity was already on before it. With
+        nothing known from before the gap it fires: an alert for the home is
+        worth one notification too many rather than one too few."""
+
+        def is_valid_transition(self, from_state: State, to_state: State) -> bool:
+            if from_state.state in _GAP:
+                return self._before_gap(to_state) != STATE_ON
+            return super().is_valid_transition(from_state, to_state)
+
+    class _HomeAlertCleared(_AcrossGaps, make_entity_target_state_trigger(HOME_DOMAIN_SPECS, STATE_OFF)):
+        """The home-affected entity switches to off.
+
+        After a gap it fires only when the entity was on before it; nothing
+        known from before is no reason to announce an all-clear."""
+
+        def is_valid_transition(self, from_state: State, to_state: State) -> bool:
+            if from_state.state in _GAP:
+                return self._before_gap(to_state) == STATE_ON
+            return super().is_valid_transition(from_state, to_state)
+
+    class _AlertCountIncreased(_AcrossGaps, EntityTriggerBase):
+        """A count sensor goes up: at least one new alert was published.
+
+        After a gap the count is compared with the last one before it."""
+
+        _domain_specs = COUNT_DOMAIN_SPECS
+
+        def is_valid_state(self, state: State, report_not_triggered) -> bool:
+            super().is_valid_state(state, report_not_triggered)
             return _number(state) is not None
 
         def is_valid_transition(self, from_state: State, to_state: State) -> bool:
             before, after = _number(from_state), _number(to_state)
+            if before is None:
+                try:
+                    before = float(self._before_gap(to_state))
+                except (TypeError, ValueError):
+                    before = None
             return before is not None and after is not None and after > before
 
     TRIGGERS: dict[str, type[Trigger]] = {

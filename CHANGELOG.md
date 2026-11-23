@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.1 — 2026-11-23
+
+- **Fixed: an alert published during a feed outage did not fire the triggers.** While Alertswiss cannot be reached the entities are unavailable, and Home Assistant ignores every change out of "unavailable". An alert for the home location that appeared during such an outage switched the sensor from unavailable to on, and *Alert for the home location started* stayed silent; *Alert count increased* and *cleared* had the same gap. The triggers now compare with the state before the outage: a new alert fires, one that was already active does not fire a second time, and *cleared* fires only when there was an alert before.
+
 ## 1.8.0 — 2026-11-23
 
 Checked against the live Alertswiss feed of 23 November 2026 (eight alerts, all four languages).
