@@ -3,8 +3,8 @@ Download diagnostics): what the entry is configured with, what the
 coordinators last fetched and the current state of the entry's entities, so
 an issue report can carry the facts instead of a description of them.
 
-Coordinates, credentials and the entry's title, unique id and name are
-redacted; of the last error only the type is kept, its text can repeat a
+Coordinates, distances, credentials and the entry's title, unique id and
+name are redacted; of the last error only the type is kept, its text can repeat a
 request URL. Entity ids and names stay readable and can contain a place name.
 Long lists and texts are cut, the counts are kept.
 """
@@ -26,6 +26,26 @@ MAX_ITEMS = 25
 MAX_TEXT = 300
 
 
+def _secret(key: Any) -> bool:
+    """A key in TO_REDACT, or any distance: the points the distances lead to
+    (car parks, stations, epicentres) are public, so a handful of them is
+    enough to work out the place they were measured from."""
+    key = str(key).lower()
+    return key in TO_REDACT or "distance" in key
+
+
+def _entity_state(entity_id: str, state: Any) -> Any:
+    """An entity's state, unless it is a distance: the state of a map marker
+    is its distance from the home zone, and distance sensors measure from
+    the configured place."""
+    if state is None:
+        return None
+    is_distance = entity_id.startswith("geo_location.") or state.attributes.get("device_class") == "distance"
+    if is_distance and state.state not in ("unknown", "unavailable"):
+        return REDACTED
+    return state.state
+
+
 def _compact(value: Any, depth: int = 0) -> Any:
     """A JSON-safe, size-limited copy of a value, with the keys in TO_REDACT replaced."""
     if depth > 8:
@@ -35,7 +55,7 @@ def _compact(value: Any, depth: int = 0) -> Any:
     if isinstance(value, dict):
         items = list(value.items())
         out = {
-            str(k): (REDACTED if str(k).lower() in TO_REDACT and v not in (None, "") else _compact(v, depth + 1))
+            str(k): (REDACTED if _secret(k) and v not in (None, "") else _compact(v, depth + 1))
             for k, v in items[:MAX_ITEMS]
         }
         if len(items) > MAX_ITEMS:
@@ -95,7 +115,7 @@ async def async_get_config_entry_diagnostics(hass: HomeAssistant, entry: ConfigE
                 "unique_id": reg.unique_id,
                 "disabled_by": reg.disabled_by,
                 "hidden_by": reg.hidden_by,
-                "state": state.state if state else None,
+                "state": _entity_state(reg.entity_id, state),
                 "attributes": _compact(dict(state.attributes)) if state else None,
             }
         )

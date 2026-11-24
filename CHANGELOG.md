@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.2 — 2026-11-24
+
+- **Diagnostics without distances.** The diagnostics download no longer contains distances: the state of the map markers (their distance from the home zone), distance sensors and every distance field are redacted, like the coordinates already were. The points they lead to are public, so a handful of distances was enough to work out where they were measured from. If you posted a diagnostics file publicly, consider removing it.
+
 ## 1.8.1 — 2026-11-23
 
 - **Fixed: an alert published during a feed outage did not fire the triggers.** While Alertswiss cannot be reached the entities are unavailable, and Home Assistant ignores every change out of "unavailable". An alert for the home location that appeared during such an outage switched the sensor from unavailable to on, and *Alert for the home location started* stayed silent; *Alert count increased* and *cleared* had the same gap. The triggers now compare with the state before the outage: a new alert fires, one that was already active does not fire a second time, and *cleared* fires only when there was an alert before.
