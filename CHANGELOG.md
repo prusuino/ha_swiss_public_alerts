@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.9.0 — 2026-11-24
+
+- **Hazard maps for cards.** The integration now offers the danger level of every region for forest fire, flood and drought to dashboard cards. The *Switzerland* card of [Swiss Meteo](https://github.com/prusuino/ha_swiss_meteo) (1.9.0 or newer) shows them as layers. The data is the open geodata of the Federal Office for the Environment FOEN; it is read only when a card asks, kept for half an hour and then only transferred again when it changed (0.1 to 1 MB per map).
+- No new entities and nothing to configure.
+
 ## 1.8.2 — 2026-11-24
 
 - **Diagnostics without distances.** The diagnostics download no longer contains distances: the state of the map markers (their distance from the home zone), distance sensors and every distance field are redacted, like the coordinates already were. The points they lead to are public, so a handful of distances was enough to work out where they were measured from. If you posted a diagnostics file publicly, consider removing it.

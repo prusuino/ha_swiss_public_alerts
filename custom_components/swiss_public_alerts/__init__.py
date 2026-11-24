@@ -30,6 +30,7 @@ from .const import (
     SOURCE_HAZARDS,
     STATIC_URL_BASE,
 )
+from .hazard_map import async_register_view
 from .hazards import (
     HazardsApiError,
     HazardsClient,
@@ -205,6 +206,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: SwissPublicAlertsConfigE
             ]
         )
         hass.data[f"{DOMAIN}_static_registered"] = True
+
+    async_register_view(hass)
 
     sources = enabled_sources(entry)
 

@@ -21,6 +21,7 @@ Optionally, it also tracks the **natural hazard danger levels** for your locatio
 - **Knows whether your home is affected**: your home location is tested against the official area of every alert — its polygon minus the zones the authority cut out, or its circle — not a radius guess.
 - **The full official text**: alert text and behaviour instructions on the sensor; test alerts and all-clear messages are filtered out.
 - **Alerts on the map and in numbers**: one marker per alert with a severity symbol, the number of alerts nationwide and for your home.
+- **Hazard maps for cards**: the danger level of every region for forest fire, flood and drought (open geodata of the FOEN), shown as layers by the *Switzerland* card of [Swiss Meteo](https://github.com/prusuino/ha_swiss_meteo); read only when a card asks.
 - **Natural hazard danger levels**: optionally the levels from naturgefahren.ch for twelve processes — from wind, thunderstorm and heat wave to flood, avalanches and forest fire — with a sensor for the highest one.
 - **Three dashboard cards**: ticker, alert and list, filtered by canton, distance or severity, all with a visual editor — plus a dashboard strategy.
 - **Built for the automation editor**: triggers (alert for the home location started, cleared, alert count increased), conditions (home location is / is not affected) and a notification blueprint — no templates needed.
